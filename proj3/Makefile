@@ -5,7 +5,7 @@ SRC_DIR = src
 TESTSRC_DIR = testsrc
 
 # Google Test flags
-GTEST_FLAGS = -lgtest -lgtest_main -pthread
+GTEST_FLAGS = -L/opt/homebrew/opt/googletest/lib -lgtest -lgtest_main -pthread
 
 # Executables
 TESTS = teststrutils teststrdatasource teststrdatasink testdsv testxml testcsvbs testosm
@@ -13,7 +13,7 @@ TARGETS = $(addprefix $(BIN_DIR)/, $(TESTS))
 
 # Compiler and flags
 CXX = g++
-CXXFLAGS = -std=c++17 -I./include
+CXXFLAGS = -std=c++17 -I./include -I/opt/homebrew/opt/googletest/include
 
 # Default target
 all: directories $(TARGETS) runtests
@@ -46,7 +46,7 @@ $(BIN_DIR)/testdsv: $(OBJ_DIR)/$(SRC_DIR)/DSVReader.o $(OBJ_DIR)/$(SRC_DIR)/DSVW
 	$(CXX) $^ -o $@ $(GTEST_FLAGS)
 
 $(BIN_DIR)/testxml: $(OBJ_DIR)/$(SRC_DIR)/XMLReader.o $(OBJ_DIR)/$(SRC_DIR)/XMLWriter.o $(OBJ_DIR)/$(TESTSRC_DIR)/XMLTest.o \
-                    $(OBJ_DIR)/$(SRC_DIR)/StringDataSource.o $(OBJ_DIR)/$(SRC_DIR)/StringDataSink.o $(OBJ_DIR)/$(SRC_DIR)/XMLEntity.o
+                    $(OBJ_DIR)/$(SRC_DIR)/StringDataSource.o $(OBJ_DIR)/$(SRC_DIR)/StringDataSink.o
 	$(CXX) $^ -o $@ $(GTEST_FLAGS) -lexpat
 
 $(BIN_DIR)/testcsvbs: $(OBJ_DIR)/$(SRC_DIR)/CSVBusSystem.o $(OBJ_DIR)/$(TESTSRC_DIR)/CSVBusSystemTest.o \
@@ -54,7 +54,7 @@ $(BIN_DIR)/testcsvbs: $(OBJ_DIR)/$(SRC_DIR)/CSVBusSystem.o $(OBJ_DIR)/$(TESTSRC_
 	$(CXX) $^ -o $@ $(GTEST_FLAGS)
 
 $(BIN_DIR)/testosm: $(OBJ_DIR)/$(SRC_DIR)/OpenStreetMap.o $(OBJ_DIR)/$(TESTSRC_DIR)/OpenStreetMapTest.o \
-                    $(OBJ_DIR)/$(SRC_DIR)/XMLReader.o $(OBJ_DIR)/$(SRC_DIR)/XMLEntity.o $(OBJ_DIR)/$(SRC_DIR)/StringDataSource.o
+                    $(OBJ_DIR)/$(SRC_DIR)/XMLReader.o $(OBJ_DIR)/$(SRC_DIR)/StringDataSource.o
 	$(CXX) $^ -o $@ $(GTEST_FLAGS) -lexpat
 
 # Run tests in order
