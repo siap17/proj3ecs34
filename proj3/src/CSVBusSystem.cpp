@@ -28,20 +28,6 @@ struct CCSVBusSystem::SImplementation {
         TRouteID DRouteID; 
         std::string DName; 
         std::vector<TStopID> DStropIDs; 
-
-        std::string Name() const noexcept override{
-            return DName; 
-        }
-        std::size_t StopCount() const noexcept override {
-            return DStropIDs.size(); 
-        }
-
-        TStopID GetStopID(std::size_t index) const noexcept override {
-            if (index < DStropIDs.size()){
-                return DStropIDs[index]; 
-            }
-            return 0; 
-        }
     }; 
 
     std::vector<SStop> DStops; 
