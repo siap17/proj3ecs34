@@ -14,14 +14,6 @@ struct CCSVBusSystem::SImplementation {
         std:: string DName; 
         double DLatitude; 
         double Dlongitude; 
-
-        TStopID ID() const noexcept override {
-            return DStopID; 
-        }
-
-        CStreetMap::TNodeID NodeID() const noexcept override {
-            return 0; 
-        }
     }; 
 
     struct SRoute {
