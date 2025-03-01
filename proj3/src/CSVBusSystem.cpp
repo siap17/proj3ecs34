@@ -13,13 +13,34 @@ struct CCSVBusSystem::SImplementation {
         TStopID DStopID; 
         std:: string DName; 
         double DLatitude; 
-        double Dlongitude; 
+        double Dlongitude;
+
+        TStopID ID() const noexcept override {
+            return DStopID; 
+        } 
+
+        CStreetMap::TNodeID NodeID() const noexcept override {
+
+            return static_cast<CStreetMap::TNodeID>(DStopID); 
+        }
     }; 
 
     struct SRoute : public CBusSystem::SRoute {
         TRouteID DRouteID; 
         std::string DName; 
         std::vector<TStopID> DStopIDs; 
+
+        std::string Name() const noexcept override{
+            return DName; 
+        }
+
+        std::size_t StopCount() const noexcept override{ 
+            return DStopIDs.size(); 
+        }
+
+        TStopID GetStopID(std::size_t index) const noexcept override{
+            return (index < DStopIDs.size()) ? DStopIDs[index] : TStopId(-1); 
+        }
     }; 
 
     std::vector<SStop> DStops; 
@@ -40,8 +61,9 @@ struct CCSVBusSystem::SImplementation {
                 SStop stop; 
                 stop.DStopID = std::stoul(stopRow[0]); 
                 stop.DStopID = std::stoul(stopRow[1]);
+
                 DStops.push_back(stop);
-                DStopByIDMap[stop.DStopID] = std::make_shared<SStop>(stop); 
+                DStopByIDMap[stop.DStopID] = std::make_shared<SStop>(std::move(stop)); 
             }
         }
 
@@ -58,11 +80,12 @@ struct CCSVBusSystem::SImplementation {
                 auto RoutingID = DRouteByNameMap.find(rName); 
 
                 if (RoutingID == DRouteByNameMap.end()){
-                    SRoute route; 
-                    route.DRouteID = DRoutes.size(); 
-                    route.DName = rName; 
-                    DRoutes.push_back(route); 
-                    DRouteByNameMap[rName] = std::make_shared<SRoute>(route); 
+                    auto route = std::make_shared<SRoute>(); 
+                    route->DRouteID = DRoutes.size(); 
+                    route->DName = rName; 
+                    DRoutes.push_back(*route); 
+
+                    DRouteByNameMap[rName] = route; 
                 }
                 DRouteByNameMap[rName]->DStopIDs.push_back(std::stoul(routeRow[1])); 
             }
