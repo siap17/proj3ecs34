@@ -30,7 +30,7 @@ struct CCSVBusSystem::SImplementation {
         std::vector<TStopID> DStropIDs; 
 
         std::string Name() const noexcept override{
-            return DStropIDs.size(); 
+            return DName; 
         }
         std::size_t StopCount() const noexcept override {
             return DStropIDs.size(); 
@@ -141,7 +141,7 @@ std::shared_ptr<CBusSystem::SRoute> CCSVBusSystem::RouteByIndex(std::size_t inde
 std::shared_ptr<CBusSystem::SRoute> CCSVBusSystem::RouteByName(const std::string &name) const noexcept { 
     
     auto it = DImplementation->DRouteByNameMap.find(name); 
-    if (it != DImplemnetation->DRouteByNameMap.end()){
+    if (it != DImplementation->DRouteByNameMap.end()){
         return it->second; 
     }
     return nullptr; 
