@@ -39,7 +39,10 @@ struct CCSVBusSystem::SImplementation {
         }
 
         TStopID GetStopID(std::size_t index) const noexcept override{
-            return (index < DStopIDs.size()) ? DStopIDs[index] : TStopID(-1); 
+            if (index < DStopIDs.size()){
+                return DStopIDs[index]; 
+            }
+            return 0; 
         }
     }; 
 
@@ -80,12 +83,11 @@ struct CCSVBusSystem::SImplementation {
                 auto RoutingID = DRouteByNameMap.find(rName); 
 
                 if (RoutingID == DRouteByNameMap.end()){
-                    auto route = std::make_shared<SRoute>(); 
-                    route->DRouteID = DRoutes.size(); 
-                    route->DName = rName; 
-                    DRoutes.push_back(*route); 
-
-                    DRouteByNameMap[rName] = std::make_shared<SRoute>(route); 
+                    SRoute route; 
+                    route.DRouteID = DRoutes.size(); 
+                    route.DName = rName; 
+                    DRoutes.push_back(route); 
+                    DRouteByNameMap[rName] = std::make_shared<SRoute>(route);  
                 }
                 DRouteByNameMap[rName]->DStopIDs.push_back(std::stoul(routeRow[1])); 
             }
