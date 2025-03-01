@@ -9,7 +9,7 @@ using TRouteID = unsigned int;
 
 // Private Implementation
 struct CCSVBusSystem::SImplementation {
-    struct SStop{
+    struct SStop : public CBusSystem::SStop{
         TStopID DStopID; 
         std:: string DName; 
         double DLatitude; 
@@ -19,7 +19,7 @@ struct CCSVBusSystem::SImplementation {
             return DStopID; 
         }
 
-        CStreetMap::TNodeId NodeID() const noexcept override {
+        CStreetMap::TNodeID NodeID() const noexcept override {
             return 0; 
         }
     }; 
@@ -28,18 +28,32 @@ struct CCSVBusSystem::SImplementation {
         TRouteID DRouteID; 
         std::string DName; 
         std::vector<TStopID> DStropIDs; 
+
+        std::string Name() const noexcept override{
+            return DStropIDs.size(); 
+        }
+        std::size_t StopCount() const noexcept override {
+            return DStropIDs.size(); 
+        }
+
+        TStopID GetStopID(std::size_t index) const noexcept override {
+            if (index < DStropIDs.size()){
+                return DStropIDs[index]; 
+            }
+            return 0; 
+        }
     }; 
 
     std::vector<SStop> DStops; 
     std::vector<SRoute> DRoutes; 
     std::unordered_map<TStopID, std::shared_ptr<CBusSystem::SStop>> DStopByIDMap; 
-    std::unordered_map<TStopID, std::shared_ptr<CBusSystem::SRoute>> DRouteByNameMap;
+    std::unordered_map<std::string, std::shared_ptr<CBusSystem::SRoute>> DRouteByNameMap;
 
     SImplementation(std::shared_ptr<CDSVReader> stopsrc, std::shared_ptr<CDSVReader> routesrc){
 
         std:: vector<std::string> stopRow; 
 
-        while (stoprow->ReadRow(stopRow)){
+        while (stopsrc->ReadRow(stopRow)){
             if (stopRow.size() >= 4){
                 SStop stop; 
                 stop.DStopID = std::stoul(stopRow[0]); 
@@ -75,11 +89,11 @@ struct CCSVBusSystem::SImplementation {
         }
 
         for (const auto& stop : DStops){
-            DStopByIDMap[stop.DStopID] = std::make_shared<CBusSystem::SStop>(stop.DStopID, stop.DName, stop.DLatitude, stop.Dlongitude); 
+            DStopByIDMap[stop.DStopID] = std::make_shared<CBusSystem::SStop>(stop); 
         }
 
         for (const auto& route : DRoutes){
-            DRouteByNameMap[route.DName] = std::make_shared<CBusSystem:: SRoute> (route.DRouteID, route.DName. route.DStropIDs); 
+            DRouteByNameMap[route.DName] = std::make_shared<CBusSystem:: SRoute> (route); 
         }
     }
 };
@@ -117,7 +131,7 @@ std::shared_ptr<CBusSystem::SStop> CCSVBusSystem::StopByID(TStopID id) const noe
 }
 
 std::shared_ptr<CBusSystem::SRoute> CCSVBusSystem::RouteByIndex(std::size_t index) const noexcept { 
-    if (index < DImplemenation->DRoutes.size()){
+    if (index < DImplementation->DRoutes.size()){
         const auto& route = DImplementation->DRoutes[index]; 
         return std::make_shared<CBusSystem::SRoute>(route.DRouteID, route.DName, route.DStropIDs); 
     }
