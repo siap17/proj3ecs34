@@ -3,6 +3,7 @@
 #include <memory>
 #include <unordered_map> 
 #include <string> 
+#include <sstream> 
 
 using TRouteID = unsigned int; 
 
@@ -26,7 +27,7 @@ struct CCSVBusSystem::SImplementation {
     std::unordered_map<TStopID, std::shared_ptr<CBusSystem::SStop>> DStopByIDMap; 
     std::unordered_map<TStopID, std::shared_ptr<CBusSystem::SRoute>> DRouteByNameMap;
 
-    SImplmentation(std::shared_ptr<CDSVReader> stopsrc, std::shared_ptr<CDSVReader> routesrc){
+    SImplementation(std::shared_ptr<CDSVReader> stopsrc, std::shared_ptr<CDSVReader> routesrc){
         std:: vector<std::string> stopRow; 
         while (stoprow->ReadRow(stopRow)){
             if (stopRow.size() >= 4){
@@ -34,7 +35,7 @@ struct CCSVBusSystem::SImplementation {
                 stop.DStopID = std::stoul(stopRow[0]); 
                 stop.DName = stopRow[1]; 
                 stop.DLatitude = std::stod(stopRow[2]); 
-                stop.DLongitude = std::stod(stopRow[3]); 
+                stop.Dlongitude = std::stod(stopRow[3]); 
                 DStops.push_back(stop);
             }
 
@@ -60,7 +61,7 @@ struct CCSVBusSystem::SImplementation {
         }
 
         for (const auto& stop : DStops){
-            DStopByIDMap[stop.DStopID] = std::make_shared<CBusSystem::SStop>(stop.DStopID, stop.DName, stop.DLatitude, stop.DLongitude); 
+            DStopByIDMap[stop.DStopID] = std::make_shared<CBusSystem::SStop>(stop.DStopID, stop.DName, stop.DLatitude, stop.Dlongitude); 
         }
 
         for (const auto& route : DRoutes){
@@ -82,7 +83,7 @@ std::size_t CCSVBusSystem::RouteCount() const noexcept {
 std::shared_ptr<CBusSystem::SStop> CCSVBusSystem::StopByIndex(std::size_t index) const noexcept { 
     if (index < DImplementation->DStops.size()){
         const auto& stop = DImplementation->DStops[index]; 
-        return std::make_shared<CBusSystem::SStop>(stop.DStopID, stop.DName, stop.DLatitude, stop.DLongitude); 
+        return std::make_shared<CBusSystem::SStop>(stop.DStopID, stop.DName, stop.DLatitude, stop.Dlongitude); 
     }
     return nullptr; 
 }
