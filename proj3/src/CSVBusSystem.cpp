@@ -1,4 +1,5 @@
 #include "CSVBusSystem.h"
+#include "BusSystem.h"
 #include <vector>
 #include <memory>
 #include <unordered_map> 
@@ -66,7 +67,7 @@ struct CCSVBusSystem::SImplementation {
                 stop.DStopID = std::stoul(stopRow[1]);
 
                 DStops.push_back(stop);
-                DStopByIDMap[stop.DStopID] = std::make_shared<SStop>(std::move(stop)); 
+                DStopByIDMap[stop.DStopID] = std::make_shared<SStop>(stop); 
             }
         }
 
