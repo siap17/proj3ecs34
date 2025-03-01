@@ -39,7 +39,7 @@ struct CCSVBusSystem::SImplementation {
         }
 
         TStopID GetStopID(std::size_t index) const noexcept override{
-            return (index < DStopIDs.size()) ? DStopIDs[index] : TStopId(-1); 
+            return (index < DStopIDs.size()) ? DStopIDs[index] : TStopID(-1); 
         }
     }; 
 
