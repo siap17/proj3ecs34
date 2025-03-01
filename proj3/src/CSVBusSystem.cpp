@@ -71,7 +71,7 @@ struct CCSVBusSystem::SImplementation {
                     DRoutes.push_back(route); 
                     DRouteByNameMap[rName] = std::make_shared<SRoute>(route); 
                 }
-                DRouteByNameMap[rName]->DStopIDs.push_back(std::stoul(routeRow[1])); 
+                DRouteByNameMap[rName]->DStropIDs.push_back(std::stoul(routeRow[1])); 
             }
 
         }
