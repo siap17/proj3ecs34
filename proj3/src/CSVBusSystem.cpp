@@ -21,7 +21,6 @@ struct CCSVBusSystem::SImplementation {
         } 
 
         CStreetMap::TNodeID NodeID() const noexcept override {
-
             return static_cast<CStreetMap::TNodeID>(DStopID); 
         }
     }; 
@@ -90,7 +89,7 @@ struct CCSVBusSystem::SImplementation {
                     DRoutes.push_back(route); 
                     DRouteByNameMap[rName] = std::make_shared<SRoute>(route);  
                 }
-                static_cast<SRoute*>(DRouteByNameMap[rName].get()->DStopIDs.push_back(std::stoul(routeRow[1]))); 
+               DRouteByNameMap[rName]->DStopIDs.push_back(std::stoul(routeRow[1])); 
             }
 
         }
@@ -132,7 +131,8 @@ std::shared_ptr<CBusSystem::SStop> CCSVBusSystem::StopByID(TStopID id) const noe
 std::shared_ptr<CBusSystem::SRoute> CCSVBusSystem::RouteByIndex(std::size_t index) const noexcept { 
     if (index < DImplementation->DRoutes.size()){
         const auto& route = DImplementation->DRoutes[index]; 
-        return DImplementation->DRouteByNameMap[route.DName]l 
+        return DImplementation->DRouteByNameMap[route.DName];
+    }
     return nullptr;
 }
 
