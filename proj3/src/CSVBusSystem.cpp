@@ -90,7 +90,7 @@ struct CCSVBusSystem::SImplementation {
                     DRoutes.push_back(route); 
                     DRouteByNameMap[rName] = std::make_shared<SRoute>(route);  
                 }
-                DRouteByNameMap[rName]->DStopIDs.push_back(std::stoul(routeRow[1])); 
+                static_cast<SRoute*>(DRouteByNameMap[rName].get()->DStopIDs.push_back(std::stoul(routeRow[1]))); 
             }
 
         }
@@ -115,7 +115,7 @@ std::size_t CCSVBusSystem::RouteCount() const noexcept {
 std::shared_ptr<CBusSystem::SStop> CCSVBusSystem::StopByIndex(std::size_t index) const noexcept { 
     if (index < DImplementation->DStops.size()){
         const auto& stop = DImplementation->DStops[index]; 
-        return std::make_shared<CBusSystem::SStop>(stop.DStopID, stop.DName, stop.DLatitude, stop.Dlongitude); 
+        return DImplementation->DStopByIDMap[stop.DStopID]; 
     }
     return nullptr; 
 }
@@ -132,8 +132,7 @@ std::shared_ptr<CBusSystem::SStop> CCSVBusSystem::StopByID(TStopID id) const noe
 std::shared_ptr<CBusSystem::SRoute> CCSVBusSystem::RouteByIndex(std::size_t index) const noexcept { 
     if (index < DImplementation->DRoutes.size()){
         const auto& route = DImplementation->DRoutes[index]; 
-        return std::make_shared<CBusSystem::SRoute>(route.DRouteID, route.DName, route.DStopIDs); 
-    }
+        return DImplementation->DRouteByNameMap[route.DName]l 
     return nullptr;
 }
 
