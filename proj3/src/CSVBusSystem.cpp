@@ -4,6 +4,8 @@
 #include <unordered_map> 
 #include <string> 
 
+using TRouteID = unsigned int; 
+
 // Private Implementation
 struct CCSVBusSystem::SImplementation {
     struct SStop{
