@@ -48,11 +48,10 @@ struct CCSVBusSystem::SImplementation {
 
     std::vector<SStop> DStops; 
     std::vector<SRoute> DRoutes; 
-    std::unordered_map<TStopID, std::shared_ptr<CBusSystem::SStop>> DStopByIDMap; 
-    std::unordered_map<std::string, std::shared_ptr<CBusSystem::SRoute>> DRouteByNameMap;
+    std::unordered_map<TStopID, std::shared_ptr<SStop>> DStopByIDMap;
+    std::unordered_map<std::string, std::shared_ptr<SRoute>> DRouteByNameMap;
 
     SImplementation(std::shared_ptr<CDSVReader> stopsrc, std::shared_ptr<CDSVReader> routesrc){
-
         std:: vector<std::string> stopRow; 
         bool FirstRow = true; 
         while (stopsrc->ReadRow(stopRow)){
