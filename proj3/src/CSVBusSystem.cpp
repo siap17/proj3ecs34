@@ -38,48 +38,42 @@ struct CCSVBusSystem::SImplementation {
     SImplementation(std::shared_ptr<CDSVReader> stopsrc, std::shared_ptr<CDSVReader> routesrc){
 
         std:: vector<std::string> stopRow; 
-
+        bool FirstRow = true; 
         while (stopsrc->ReadRow(stopRow)){
-            if (stopRow.size() >= 4){
+            if (FirstRow) {
+                FirstRow = false; 
+                continue; 
+            }
+            if (stopRow.size() >= 2){
                 SStop stop; 
                 stop.DStopID = std::stoul(stopRow[0]); 
-                stop.DName = stopRow[1]; 
-
-                stop.DLatitude = std::stod(stopRow[2]); 
-                stop.Dlongitude = std::stod(stopRow[3]); 
-
+                stop.DStopID = std::stoul(stopRow[1]); 
                 DStops.push_back(stop);
+                DStopByIDMap[stop.DStopID] = std::make_shared<SStop>(stop); 
             }
-
-            stopRow.clear(); 
         }
 
         std::vector<std::string> routeRow; 
-
+        FirstRow = true; 
         while (routesrc ->ReadRow(routeRow)){
-            if (routeRow.size() >= 3){
-                SRoute route; 
-                route.DRouteID = std::stoul(routeRow[0]); 
-                route.DName = routeRow[1]; 
-                std::stringstream ss(routeRow[2]); 
-                TStopID stopID; 
-                while (ss >> stopID){
-                    route.DStropIDs.push_back(stopID); 
-                    if (ss.peek() == ',') ss.ignore(); 
+
+            if (FirstRow){
+                FirstRow = false; 
+                continue; 
+            }
+            if (routeRow.size() >= 2){
+                std::string rName = routeRow[0]; 
+                auto RoutingID = DRouteByNameMap.find(rName); 
+
+                if (RoutingID == DRouteByNameMap.end()){
+                    SRoute route; 
+                    route.DName = rName; 
+                    DRoutes.push_back(route); 
+                    DRouteByNameMap[rName] = std::make_shared<SRoute>(route); 
                 }
-                DRoutes.push_back(route); 
+                DRouteByNameMap[rName]->DStopIDs.push_back(std::stoul(routeRow[1])); 
             }
 
-            routeRow.clear(); 
-
-        }
-
-        for (const auto& stop : DStops){
-            DStopByIDMap[stop.DStopID] = std::make_shared<CBusSystem::SStop>(stop); 
-        }
-
-        for (const auto& route : DRoutes){
-            DRouteByNameMap[route.DName] = std::make_shared<CBusSystem:: SRoute> (route); 
         }
     }
 };
