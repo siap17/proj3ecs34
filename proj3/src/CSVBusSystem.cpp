@@ -53,16 +53,18 @@ struct CCSVBusSystem::SImplementation {
 
     SImplementation(std::shared_ptr<CDSVReader> stopsrc, std::shared_ptr<CDSVReader> routesrc){
         std:: vector<std::string> stopRow; 
-        bool FirstRow = true; 
+        stopsrc->ReadRow(stopRow); 
+
         while (stopsrc->ReadRow(stopRow)){
-            if (FirstRow) {
-                FirstRow = false; 
-                continue; 
-            }
             if (stopRow.size() >= 2){
                 SStop stop; 
                 stop.DStopID = std::stoul(stopRow[0]); 
-                stop.DStopID = std::stoul(stopRow[1]);
+                stop.DName = stopRow[1]; 
+
+                if (stopRow.size() >= 4){
+                    stop.DLatitude=std::stod(stopRow[2]); 
+                    stop.Dlongitude=std::stod(stopRow[3]); 
+                }
 
                 DStops.push_back(stop);
                 DStopByIDMap[stop.DStopID] = std::make_shared<SStop>(stop); 
@@ -70,13 +72,10 @@ struct CCSVBusSystem::SImplementation {
         }
 
         std::vector<std::string> routeRow; 
-        FirstRow = true; 
-        while (routesrc ->ReadRow(routeRow)){
+        routesrc->ReadRow(routeRow); 
 
-            if (FirstRow){
-                FirstRow = false; 
-                continue; 
-            }
+
+        while (routesrc ->ReadRow(routeRow)){
             if (routeRow.size() >= 2){
                 std::string rName = routeRow[0]; 
                 auto RoutingID = DRouteByNameMap.find(rName); 
