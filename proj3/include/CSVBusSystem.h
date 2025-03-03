@@ -3,9 +3,14 @@
 
 #include "BusSystem.h"
 #include "DSVReader.h"
+#include <memory> 
+#include <vector> 
+#include <string> 
 
 class CCSVBusSystem : public CBusSystem{
     private:
+        struct SStop; 
+        struct SRoute; 
         struct SImplementation;
         std::unique_ptr< SImplementation > DImplementation;
     public:

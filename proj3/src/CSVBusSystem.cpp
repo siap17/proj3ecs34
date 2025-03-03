@@ -77,19 +77,24 @@ CCSVBusSystem::CCSVBusSystem(std::shared_ptr<CDSVReader> stopsrc, std::shared_pt
     }
 
     if (routesrc){
+        std::vector<std::string> routeRow; 
         while (routesrc->ReadRow(stopRow)){
-            if (stopRow.size() >= 2){
+        try {
+            if (routeRow.size() >= 2){
                 std::string rName = routeRow[0]; 
-                auto RoutingID = DRouteByNameMap.find(rName); 
-
-                if (RoutingID == DRouteByNameMap.end()){
+                auto it = DImplementation->DRouteByNameMap.find(rName); 
+                if (it == DImplmentation ->DRouteByNameMap.end()){
+                    TRouteID routeID = DImplementation->DRoutes.size(); 
                     SRoute route; 
-                    route.DRouteID = DRoutes.size(); 
+                    route.DRouteID; 
                     route.DName = rName; 
-                    DRoutes.push_back(route); 
-                    DRouteByNameMap[rName] = std::make_shared<SRoute>(route);  
+                    DImplementation-> DRoutes.push_back(route); 
+                    DImplementation->DRouteByNameMap[rName] = std::make_shared<SRoute>(route);  
                 }
                DRouteByNameMap[rName]->DStopIDs.push_back(std::stoul(routeRow[1])); 
+            } catch (const std::exception& e){
+                std:: cerr<<"Error processing route row" << e.what() << "\n"; 
+            }
             }
         }
     }
@@ -143,4 +148,34 @@ std::shared_ptr<CBusSystem::SRoute> CCSVBusSystem::RouteByName(const std::string
     return nullptr; 
 }
 
+std::ostream& operator<<(std::ostream& os, const CCSVBusSystem& busSystem){
+    os << "Bus System Details:\n"; 
+    os <<"Stop Count: " << busSystem.StopCount() << "\n"; 
+    for (std::size_t i = 0; i < busSystem.stopCount(); ++i){
+        auto stopPtr = busSystem.StopbyIndex(i); 
+        if (stopPtr){
+            os << "Stop" << i << ": ID = " << stopPtr->ID() 
+               <<", NodeID = " << stopPtr->NodeID() << "\n"; 
+        }
+    }
 
+    os << "Route Count: " <<busSystem.RouteCount() << "\n"; 
+    for (std::size_t i = 0; i<busSystem.RouteCount(); ++i){
+        auto routePtr = busSystem.RouteByIndex(i); 
+        if (routePtr){
+            os << "Route " << i  << ": Name = " << routePtr->Name()
+               << ", StopCount =" << routePtr->StopCount() << "\n"; 
+            os "Stops: "; 
+
+            for (std::size_t j = 0; j < routePTr->StopCount(); ++j){
+                os <<routePtr->GetStopID(j); 
+                if (j < routePtr->StopCount() - 1){
+                    os << ", "; 
+                }
+                os << "\n"; 
+            }
+        }
+
+        return os; 
+    }
+}
