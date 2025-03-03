@@ -54,8 +54,6 @@ class CCSVBusSystem::SStop : public CBusSystem::SStop {
         std::unordered_map<TStopID, std::shared_ptr<SStop>> DStopByIDMap;
         std::unordered_map<std::string, std::shared_ptr<SRoute>> DRouteByNameMap;
 
-        SImplementation(std::shared_ptr<CDSVReader> stopsrc, std::shared_ptr<CDSVReader> routesrc){} 
-
     }; 
 
 CCSVBusSystem::CCSVBusSystem(std::shared_ptr<CDSVReader> stopsrc, std::shared_ptr<CDSVReader> routesrc){
