@@ -89,13 +89,18 @@ CCSVBusSystem::CCSVBusSystem(std::shared_ptr<CDSVReader> stopsrc, std::shared_pt
                 if (!route) {
                     route = std::make_shared<SRoute>(); 
                     route->DName = rName; 
+                    }
                 }
+                route -> DStopIDs.push_back(stopID); 
             }
-            route -> DStopIDs.push_back(stopID); 
-        }
         } catch (const std::exception& e) {
             std::cerr << "Error processing route row: " << e.what() << "\n"; 
         }
+    }
+
+    for (const auto& p : routeRow){
+        DImplementation->DRouteByNameMap[p.first] = p.second; 
+        DImplmentation->DRoutes.push_back(p.second); 
     }
 }
 
