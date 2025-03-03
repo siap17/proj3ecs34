@@ -67,7 +67,7 @@ struct COpenStreetMap::SImplementation {
             std::vector<std::string> DAttributeKeys;  // list of attribute keys for ordering
 
         public:
-            CWay(TWayID id) : DID(id) {}  // constructor for way
+            explicit CWay(TWayID id) : DID(id){} 
 
             TWayID ID() const noexcept override {  // get way id
                 return DID;
@@ -78,10 +78,8 @@ struct COpenStreetMap::SImplementation {
             }
 
             TNodeID GetNodeID(std::size_t index) const noexcept override {  // get node id at a specific index
-                if(index < DNodeIDs.size()) {
-                    return DNodeIDs[index];
-                }
-                return CStreetMap::InvalidNodeID;  // ret invalid id if index is out of bounds
+                return (index < DNodeIDs.size()) ? DNodeIDs[index] : CStreetMap::InvalidNodeID; 
+                 // ret invalid id if index is out of bounds
             }
 
             std::size_t AttributeCount() const noexcept override {  // get # of attributes
@@ -89,10 +87,8 @@ struct COpenStreetMap::SImplementation {
             }
 
             std::string GetAttributeKey(std::size_t index) const noexcept override {  // get attribute key at specific index
-                if(index < DAttributeKeys.size()) {
-                    return DAttributeKeys[index];
-                }
-                return "";  // ret empty string if index is out of bounds
+                return (index < DAttributeKeys.size()) ? DAttributeKeys[index] : ""; 
+                 // ret empty string if index is out of bounds
             }
 
             bool HasAttribute(const std::string &key) const noexcept override {  // check if the way has a specific attribute
@@ -101,10 +97,7 @@ struct COpenStreetMap::SImplementation {
 
             std::string GetAttribute(const std::string &key) const noexcept override {  // get val of a specific attribute
                 auto Search = DAttributes.find(key);
-                if(Search != DAttributes.end()) {
-                    return Search->second;
-                }
-                return "";  // ret empty string if attribute doesn't exist
+                if(Search != DAttributes.end()) ? Search->second : "";    // ret empty string if attribute doesn't exist
             }
 
             void AddNodeID(TNodeID id) {  // add a node id to the way
@@ -126,15 +119,19 @@ struct COpenStreetMap::SImplementation {
     std::unordered_map<TWayID, std::shared_ptr<CWay>> DWayMap;  // map of way ids to ways
 
     // state variables for xml parsing
-    XML_Parser DParser;  // expat xml parser
+    XML_Parser DParser = nullptr;  // expat xml parser
     bool DParsingNode = false;  //  to track if we parsing a node
     bool DParsingWay = false;  //  to track if parsing a way
     std::shared_ptr<CNode> DCurrentNode;  // curr node being parsed
     std::shared_ptr<CWay> DCurrentWay;  // curr way being parsed
 
-    // constructor that takes an xml reader
+    // constructor that takes an xml data 
     SImplementation(std::shared_ptr<CXMLReader> src) {
-        DParser = XML_ParserCreate(NULL);  // create the expat parser
+
+        if (!src){
+            return; //Null source handler 
+        }
+        DParser = XML_ParserCreate(nullptr);  // create the expat parser
         if (!DParser) {
             throw std::runtime_error("Failed to create XML parser");  // throw error if parser creation fails
         }
@@ -142,46 +139,27 @@ struct COpenStreetMap::SImplementation {
         XML_SetUserData(DParser, this);  // set user data for the parser
         XML_SetElementHandler(DParser, StartElementHandler, EndElementHandler);  // set handlers for start and end elements
 
-        // parse the xml document
-        SXMLEntity entity;
-        while (src->ReadEntity(entity, false)) {  // read entities from the xml reader
-            if (entity.DType == SXMLEntity::EType::StartElement || entity.DType == SXMLEntity::EType::EndElement) {
-                const char *name = entity.DNameData.c_str();  // get the element name
-                const char **attrs = nullptr;  // initialize attributes
-
-                // convert attributes to expat format
-                if (!entity.DAttributes.empty()) {
-                    std::vector<const char *> attrPtrs;  // vector to hold attribute pointers
-                    for (const auto &attr : entity.DAttributes) {
-                        attrPtrs.push_back(attr.first.c_str());  // add attribute key
-                        attrPtrs.push_back(attr.second.c_str());  // add attribute value
-                    }
-                    attrPtrs.push_back(nullptr);  // null-terminate the array
-                    attrs = attrPtrs.data();  // set attrs to the array
-                }
-
-                if (entity.DType == SXMLEntity::EType::StartElement) {  // handle start element
-                    StartElementHandler(this, name, attrs);
-                } else if (entity.DType == SXMLEntity::EType::EndElement) {  //  end element
-                    EndElementHandler(this, name);
-                }
-            }
-        }
-
-        //  to indicate end of document
-        if (XML_Parse(DParser, "", 0, 1) == XML_STATUS_ERROR) {  // parse the final chunk
-            std::string error = XML_ErrorString(XML_GetErrorCode(DParser));  // get  error message
-            XML_ParserFree(DParser);  // free the parser
-            throw std::runtime_error("XML parsing error at end: " + error);  // throw error if parsing fails
-        }
-
-        XML_ParserFree(DParser);  // free the parser
+        ProcessXMLEntities(src); 
+        XML_ParserFree(DParser); 
     }
 
+    void ProcessXMLEntities(std::shared_ptr<CXMLReader>src){
+        SXMLEntity entity;
+        while (src->ReadEntity(entity, false)) {  // read entities from the xml reader
+            if (entity.DType != SXMLEntity::EType::StartElement && entity.DType != SXMLEntity::EType::EndElement) {
+                continue; 
+            }
+            const char *name = entity.DNameData.c_str(); 
+            if (entity.DType == SXMLEntity::EType::StartElement){
+                StartElementHandler (name, entity.DAttributes); 
+            } else {
+                ProcessEndElement(name); 
+            }
+        }
+    }
     // xml start element handler
-    static void StartElementHandler(void *userData, const char *name, const char **attrs) {
-        SImplementation *impl = static_cast<SImplementation*>(userData);  // cast user data to implementation
-        
+    static void StartElementHandler( const char *name, const std::unordered_map<std::string, std::string>& attrs) {
+
         if (strcmp(name, "node") == 0) {  // if the element is a node
             impl->DParsingNode = true;  // set parsing node flag
             
@@ -312,17 +290,11 @@ std::shared_ptr<CStreetMap::SNode> COpenStreetMap::NodeByID(TNodeID id) const no
 
 // ret the SWay associated with index
 std::shared_ptr<CStreetMap::SWay> COpenStreetMap::WayByIndex(std::size_t index) const noexcept {
-    if (index < DImplementation->DWays.size()) {  // if index is valid
-        return DImplementation->DWays[index];  // ret the way at the index
-    }
-    return nullptr;  // ret nullptr if index is out of bounds
+    return (index < DImplementation->DWays.size()) ? DImplementation->DWays[index]: nullptr; 
 }
 
 // returns the SWay with the id
 std::shared_ptr<CStreetMap::SWay> COpenStreetMap::WayByID(TWayID id) const noexcept {
     auto Search = DImplementation->DWayMap.find(id);  // find the way in the map
-    if (Search != DImplementation->DWayMap.end()) {  // if way exists
-        return Search->second;  // return the way
-    }
-    return nullptr;  // return nullptr if way doesn't exist
+    return (Search != DImplementation->DWayMap.end()) ? Search->second : nullptr; 
 }
