@@ -1,157 +1,281 @@
 #include "OpenStreetMap.h"
 #include "XMLReader.h"
-#include "StringDataSource.h"
 #include <gtest/gtest.h>
-#include <memory>
 #include <string>
+#include <memory>
+#include <sstream>
 
-// Helper function to create a sample OSM XML string
-std::string CreateSampleOSMXML() {
-    return R"(
-        <osm version="0.6" generator="OpenStreetMap.org">
-            <node id="1" lat="37.7749" lon="-122.4194">
-                <tag k="name" v="San Francisco"/>
-                <tag k="population" v="881549"/>
-            </node>
-            <node id="2" lat="34.0522" lon="-118.2437">
-                <tag k="name" v="Los Angeles"/>
-            </node>
-            <way id="101">
-                <nd ref="1"/>
-                <nd ref="2"/>
-                <tag k="highway" v="primary"/>
-            </way>
-        </osm>
-    )";
-}
+// Mock XMLReader for testing
+class MockXMLReader : public CXMLReader {
+public:
+    MockXMLReader(const std::vector<SXMLEntity>& entities) 
+        : DEntities(entities), DCurrentIndex(0), CXMLReader("") {}
 
-// Test fixture for COpenStreetMap
-class COpenStreetMapTest : public ::testing::Test {
-protected:
-    void SetUp() override {
-        // Create a sample OSM XML string
-        std::string xmlData = CreateSampleOSMXML();
-
-        // Create a StringDataSource with the sample XML data
-        auto dataSource = std::make_shared<CStringDataSource>(xmlData);
-
-        // Create an XMLReader with the data source
-        auto xmlReader = std::make_shared<CXMLReader>(dataSource);
-
-        // Create the COpenStreetMap object
-        openStreetMap = std::make_unique<COpenStreetMap>(xmlReader);
+    bool ReadEntity(SXMLEntity& entity, bool skipComments) override {
+        if (DCurrentIndex < DEntities.size()) {
+            entity = DEntities[DCurrentIndex++];
+            return true;
+        }
+        return false;
     }
 
-    std::unique_ptr<COpenStreetMap> openStreetMap;
+private:
+    std::vector<SXMLEntity> DEntities;
+    size_t DCurrentIndex;
 };
 
-// Test NodeCount and WayCount
-TEST_F(COpenStreetMapTest, NodeAndWayCount) {
-    EXPECT_EQ(openStreetMap->NodeCount(), 2); // 2 nodes in the sample XML
-    EXPECT_EQ(openStreetMap->WayCount(), 1);  // 1 way in the sample XML
+// Helper function to create XML entities for testing
+std::vector<SXMLEntity> CreateTestOSMData() {
+    std::vector<SXMLEntity> entities;
+    
+    // OSM root element
+    SXMLEntity osmStart;
+    osmStart.DType = SXMLEntity::EType::StartElement;
+    osmStart.DNameData = "osm";
+    entities.push_back(osmStart);
+    
+    // Node 1
+    SXMLEntity node1Start;
+    node1Start.DType = SXMLEntity::EType::StartElement;
+    node1Start.DNameData = "node";
+    node1Start.DAttributes["id"] = "1001";
+    node1Start.DAttributes["lat"] = "34.1050";
+    node1Start.DAttributes["lon"] = "-118.2892";
+    entities.push_back(node1Start);
+    
+    // Tag for Node 1
+    SXMLEntity node1TagStart;
+    node1TagStart.DType = SXMLEntity::EType::StartElement;
+    node1TagStart.DNameData = "tag";
+    node1TagStart.DAttributes["k"] = "name";
+    node1TagStart.DAttributes["v"] = "Test Node 1";
+    entities.push_back(node1TagStart);
+    
+    SXMLEntity node1TagEnd;
+    node1TagEnd.DType = SXMLEntity::EType::EndElement;
+    node1TagEnd.DNameData = "tag";
+    entities.push_back(node1TagEnd);
+    
+    SXMLEntity node1End;
+    node1End.DType = SXMLEntity::EType::EndElement;
+    node1End.DNameData = "node";
+    entities.push_back(node1End);
+    
+    // Node 2
+    SXMLEntity node2Start;
+    node2Start.DType = SXMLEntity::EType::StartElement;
+    node2Start.DNameData = "node";
+    node2Start.DAttributes["id"] = "1002";
+    node2Start.DAttributes["lat"] = "34.1051";
+    node2Start.DAttributes["lon"] = "-118.2893";
+    entities.push_back(node2Start);
+    
+    SXMLEntity node2End;
+    node2End.DType = SXMLEntity::EType::EndElement;
+    node2End.DNameData = "node";
+    entities.push_back(node2End);
+    
+    // Way 1
+    SXMLEntity way1Start;
+    way1Start.DType = SXMLEntity::EType::StartElement;
+    way1Start.DNameData = "way";
+    way1Start.DAttributes["id"] = "2001";
+    entities.push_back(way1Start);
+    
+    // Node refs for Way 1
+    SXMLEntity way1Ref1Start;
+    way1Ref1Start.DType = SXMLEntity::EType::StartElement;
+    way1Ref1Start.DNameData = "nd";
+    way1Ref1Start.DAttributes["ref"] = "1001";
+    entities.push_back(way1Ref1Start);
+    
+    SXMLEntity way1Ref1End;
+    way1Ref1End.DType = SXMLEntity::EType::EndElement;
+    way1Ref1End.DNameData = "nd";
+    entities.push_back(way1Ref1End);
+    
+    SXMLEntity way1Ref2Start;
+    way1Ref2Start.DType = SXMLEntity::EType::StartElement;
+    way1Ref2Start.DNameData = "nd";
+    way1Ref2Start.DAttributes["ref"] = "1002";
+    entities.push_back(way1Ref2Start);
+    
+    SXMLEntity way1Ref2End;
+    way1Ref2End.DType = SXMLEntity::EType::EndElement;
+    way1Ref2End.DNameData = "nd";
+    entities.push_back(way1Ref2End);
+    
+    // Tag for Way 1
+    SXMLEntity way1TagStart;
+    way1TagStart.DType = SXMLEntity::EType::StartElement;
+    way1TagStart.DNameData = "tag";
+    way1TagStart.DAttributes["k"] = "highway";
+    way1TagStart.DAttributes["v"] = "residential";
+    entities.push_back(way1TagStart);
+    
+    SXMLEntity way1TagEnd;
+    way1TagEnd.DType = SXMLEntity::EType::EndElement;
+    way1TagEnd.DNameData = "tag";
+    entities.push_back(way1TagEnd);
+    
+    SXMLEntity way1End;
+    way1End.DType = SXMLEntity::EType::EndElement;
+    way1End.DNameData = "way";
+    entities.push_back(way1End);
+    
+    // End OSM
+    SXMLEntity osmEnd;
+    osmEnd.DType = SXMLEntity::EType::EndElement;
+    osmEnd.DNameData = "osm";
+    entities.push_back(osmEnd);
+    
+    return entities;
 }
 
-// Test NodeByID
-TEST_F(COpenStreetMapTest, NodeByID) {
-    auto node1 = openStreetMap->NodeByID(1);
-    ASSERT_NE(node1, nullptr);
-    EXPECT_EQ(node1->ID(), 1);
-    EXPECT_EQ(node1->Location().first, 37.7749);
-    EXPECT_EQ(node1->Location().second, -122.4194);
+// Test Suite for COpenStreetMap
+class COpenStreetMapTest : public ::testing::Test {
+protected:
+    std::shared_ptr<COpenStreetMap> DStreetMap;
+    
+    void SetUp() override {
+        auto entities = CreateTestOSMData();
+        auto xmlReader = std::make_shared<MockXMLReader>(entities);
+        DStreetMap = std::make_shared<COpenStreetMap>(xmlReader);
+    }
+};
 
-    auto node2 = openStreetMap->NodeByID(2);
-    ASSERT_NE(node2, nullptr);
-    EXPECT_EQ(node2->ID(), 2);
-    EXPECT_EQ(node2->Location().first, 34.0522);
-    EXPECT_EQ(node2->Location().second, -118.2437);
+// Test that the node count matches expectations
+TEST_F(COpenStreetMapTest, NodeCount) {
+    EXPECT_EQ(DStreetMap->NodeCount(), 2);
+}
 
-    auto invalidNode = openStreetMap->NodeByID(999); // Invalid ID
-    EXPECT_EQ(invalidNode, nullptr);
+// Test that the way count matches expectations
+TEST_F(COpenStreetMapTest, WayCount) {
+    EXPECT_EQ(DStreetMap->WayCount(), 1);
 }
 
 // Test NodeByIndex
 TEST_F(COpenStreetMapTest, NodeByIndex) {
-    auto node0 = openStreetMap->NodeByIndex(0);
-    ASSERT_NE(node0, nullptr);
-    EXPECT_EQ(node0->ID(), 1); // First node has ID 1
-
-    auto node1 = openStreetMap->NodeByIndex(1);
-    ASSERT_NE(node1, nullptr);
-    EXPECT_EQ(node1->ID(), 2); // Second node has ID 2
-
-    auto invalidNode = openStreetMap->NodeByIndex(2); // Invalid index
-    EXPECT_EQ(invalidNode, nullptr);
+    auto node = DStreetMap->NodeByIndex(0);
+    ASSERT_NE(node, nullptr);
+    EXPECT_EQ(node->ID(), 1001);
+    
+    auto location = node->Location();
+    EXPECT_DOUBLE_EQ(location.first, 34.1050);
+    EXPECT_DOUBLE_EQ(location.second, -118.2892);
+    
+    // Test out of bounds index
+    EXPECT_EQ(DStreetMap->NodeByIndex(10), nullptr);
 }
 
-// Test Node Attributes
-TEST_F(COpenStreetMapTest, NodeAttributes) {
-    auto node1 = openStreetMap->NodeByID(1);
-    ASSERT_NE(node1, nullptr);
-
-    EXPECT_EQ(node1->AttributeCount(), 2); // 2 attributes for node 1
-    EXPECT_TRUE(node1->HasAttribute("name"));
-    EXPECT_EQ(node1->GetAttribute("name"), "San Francisco");
-    EXPECT_TRUE(node1->HasAttribute("population"));
-    EXPECT_EQ(node1->GetAttribute("population"), "881549");
-
-    auto node2 = openStreetMap->NodeByID(2);
-    ASSERT_NE(node2, nullptr);
-
-    EXPECT_EQ(node2->AttributeCount(), 1); // 1 attribute for node 2
-    EXPECT_TRUE(node2->HasAttribute("name"));
-    EXPECT_EQ(node2->GetAttribute("name"), "Los Angeles");
-}
-
-// Test WayByID
-TEST_F(COpenStreetMapTest, WayByID) {
-    auto way101 = openStreetMap->WayByID(101);
-    ASSERT_NE(way101, nullptr);
-    EXPECT_EQ(way101->ID(), 101);
-
-    auto invalidWay = openStreetMap->WayByID(999); // Invalid ID
-    EXPECT_EQ(invalidWay, nullptr);
+// Test NodeByID
+TEST_F(COpenStreetMapTest, NodeByID) {
+    auto node = DStreetMap->NodeByID(1002);
+    ASSERT_NE(node, nullptr);
+    EXPECT_EQ(node->ID(), 1002);
+    
+    // Test invalid ID
+    EXPECT_EQ(DStreetMap->NodeByID(9999), nullptr);
 }
 
 // Test WayByIndex
 TEST_F(COpenStreetMapTest, WayByIndex) {
-    auto way0 = openStreetMap->WayByIndex(0);
-    ASSERT_NE(way0, nullptr);
-    EXPECT_EQ(way0->ID(), 101); // Only way has ID 101
-
-    auto invalidWay = openStreetMap->WayByIndex(1); // Invalid index
-    EXPECT_EQ(invalidWay, nullptr);
+    auto way = DStreetMap->WayByIndex(0);
+    ASSERT_NE(way, nullptr);
+    EXPECT_EQ(way->ID(), 2001);
+    EXPECT_EQ(way->NodeCount(), 2);
+    
+    // Test out of bounds index
+    EXPECT_EQ(DStreetMap->WayByIndex(10), nullptr);
 }
 
-// Test Way Node References
-TEST_F(COpenStreetMapTest, WayNodeReferences) {
-    auto way101 = openStreetMap->WayByID(101);
-    ASSERT_NE(way101, nullptr);
-
-    EXPECT_EQ(way101->NodeCount(), 2); // 2 nodes in the way
-    EXPECT_EQ(way101->GetNodeID(0), 1); // First node has ID 1
-    EXPECT_EQ(way101->GetNodeID(1), 2); // Second node has ID 2
-
-    auto invalidNodeID = way101->GetNodeID(2); // Invalid index
-    EXPECT_EQ(invalidNodeID, CStreetMap::InvalidNodeID);
+// Test WayByID
+TEST_F(COpenStreetMapTest, WayByID) {
+    auto way = DStreetMap->WayByID(2001);
+    ASSERT_NE(way, nullptr);
+    EXPECT_EQ(way->ID(), 2001);
+    
+    // Test invalid ID
+    EXPECT_EQ(DStreetMap->WayByID(9999), nullptr);
 }
 
-// Test Way Attributes
-TEST_F(COpenStreetMapTest, WayAttributes) {
-    auto way101 = openStreetMap->WayByID(101);
-    ASSERT_NE(way101, nullptr);
-
-    EXPECT_EQ(way101->AttributeCount(), 1); // 1 attribute for way 101
-    EXPECT_TRUE(way101->HasAttribute("highway"));
-    EXPECT_EQ(way101->GetAttribute("highway"), "primary");
+// Test node attributes
+TEST_F(COpenStreetMapTest, NodeAttributes) {
+    auto node = DStreetMap->NodeByID(1001);
+    ASSERT_NE(node, nullptr);
+    
+    EXPECT_TRUE(node->HasAttribute("name"));
+    EXPECT_EQ(node->GetAttribute("name"), "Test Node 1");
+    EXPECT_FALSE(node->HasAttribute("nonexistent"));
+    EXPECT_EQ(node->GetAttribute("nonexistent"), "");
+    
+    EXPECT_EQ(node->AttributeCount(), 1);
+    EXPECT_EQ(node->GetAttributeKey(0), "name");
 }
 
-// Test Invalid XML
-TEST(COpenStreetMapInvalidXMLTest, InvalidXML) {
-    std::string invalidXML = "<invalid></invalid>";
-    auto dataSource = std::make_shared<CStringDataSource>(invalidXML);
-    auto xmlReader = std::make_shared<CXMLReader>(dataSource);
+// Test way attributes and node references
+TEST_F(COpenStreetMapTest, WayAttributesAndNodes) {
+    auto way = DStreetMap->WayByID(2001);
+    ASSERT_NE(way, nullptr);
+    
+    EXPECT_TRUE(way->HasAttribute("highway"));
+    EXPECT_EQ(way->GetAttribute("highway"), "residential");
+    
+    EXPECT_EQ(way->NodeCount(), 2);
+    EXPECT_EQ(way->GetNodeID(0), 1001);
+    EXPECT_EQ(way->GetNodeID(1), 1002);
+    EXPECT_EQ(way->GetNodeID(2), CStreetMap::InvalidNodeID);
+}
 
-    EXPECT_THROW({
-        COpenStreetMap openStreetMap(xmlReader);
-    }, std::runtime_error);
+// Test empty or invalid input
+TEST(COpenStreetMapEmptyTest, HandleEmptyData) {
+    std::vector<SXMLEntity> emptyEntities;
+    auto xmlReader = std::make_shared<MockXMLReader>(emptyEntities);
+    
+    COpenStreetMap streetMap(xmlReader);
+    EXPECT_EQ(streetMap.NodeCount(), 0);
+    EXPECT_EQ(streetMap.WayCount(), 0);
+}
+
+// Test malformed input - missing attributes
+TEST(COpenStreetMapMalformedTest, HandleMalformedData) {
+    std::vector<SXMLEntity> entities;
+    
+    // OSM root element
+    SXMLEntity osmStart;
+    osmStart.DType = SXMLEntity::EType::StartElement;
+    osmStart.DNameData = "osm";
+    entities.push_back(osmStart);
+    
+    // Malformed node (missing lat/lon)
+    SXMLEntity nodeStart;
+    nodeStart.DType = SXMLEntity::EType::StartElement;
+    nodeStart.DNameData = "node";
+    nodeStart.DAttributes["id"] = "1001";
+    // Missing lat/lon attributes
+    entities.push_back(nodeStart);
+    
+    SXMLEntity nodeEnd;
+    nodeEnd.DType = SXMLEntity::EType::EndElement;
+    nodeEnd.DNameData = "node";
+    entities.push_back(nodeEnd);
+    
+    // End OSM
+    SXMLEntity osmEnd;
+    osmEnd.DType = SXMLEntity::EType::EndElement;
+    osmEnd.DNameData = "osm";
+    entities.push_back(osmEnd);
+    
+    auto xmlReader = std::make_shared<MockXMLReader>(entities);
+    
+    // This should not crash
+    COpenStreetMap streetMap(xmlReader);
+    // The node should still be counted even if lat/lon are missing
+    EXPECT_EQ(streetMap.NodeCount(), 1);
+}
+
+
+int main(int argc, char **argv) {
+    ::testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
 }

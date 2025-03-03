@@ -2,6 +2,9 @@
 #define BUSROUTE_H
 
 #include "StreetMap.h"
+#include <string> 
+#include <memory> 
+#include <limits> 
 
 class CBusSystem{
     public:
