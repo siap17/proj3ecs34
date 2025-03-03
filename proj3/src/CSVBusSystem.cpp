@@ -48,12 +48,13 @@ class CCSVBusSystem::SRoute : public CBusSystem::SRoute {
     }; 
 
     struct CCSVBusSystem::SImplementation{
-        std::unordered_map<TStopID, std::shared_ptr<SStop>> DStopByIDMap;
-        std::unordered_map<std::string, std::shared_ptr<SRoute>> DRouteByNameMap;
         std::vector<std::shared_ptr<SStop>> DStops; 
         std::vector<std::shared_ptr<SRoute>> DRoutes; 
+        std::unordered_map<TStopID, std::shared_ptr<SStop>> DStopByIDMap;
+        std::unordered_map<std::string, std::shared_ptr<SRoute>> DRouteByNameMap;
 
-        SImplementation(std::shared_ptr<CDSVReader> stopsrc, std::shared_ptr<routesrc>){
+
+        SImplementation(std::shared_ptr<CDSVReader> stopsrc, std::shared_ptr<CDSVReader>routesrc){
 
         }
     }; 
@@ -82,11 +83,11 @@ CCSVBusSystem::CCSVBusSystem(std::shared_ptr<CDSVReader> stopsrc, std::shared_pt
     if (routesrc) {
         std::unordered_map<std::string, std::shared_ptr<SRoute>> routeMap;
 
-        while (routesrc->ReadRow(row)) {
-            if (row.size() >= 2) {
+        while (routesrc->ReadRow(stopRow)) {
+            if (stopRow.size() >= 2) {
                 try {
-                    std::string rName = row[0];
-                    TStopID stopID = std::stoul(row[1]);
+                    std::string rName = stopRow[0];
+                    TStopID stopID = std::stoul(stopRow[1]);
                     
                     auto& route = routeMap[rName];
                     if (!route) {
@@ -122,8 +123,7 @@ std::size_t CCSVBusSystem::RouteCount() const noexcept {
 
 std::shared_ptr<CBusSystem::SStop> CCSVBusSystem::StopByIndex(std::size_t index) const noexcept { 
     if (index < DImplementation->DStops.size()){
-        const auto& stop = DImplementation->DStops[index]; 
-        return DImplementation->DStopByIDMap[stop.DStopID]; 
+        return DImplementation->DStops[index]; 
     }
     return nullptr; 
 }
