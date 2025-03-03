@@ -24,7 +24,7 @@ class CCSVBusSystem::SStop : public CBusSystem::SStop {
         }
     }; 
 
-    class CCSVBusSystem:: SRoute : public CBusSystem::SRoute {
+    class CCSVBusSystem::SRoute : public CBusSystem::SRoute {
     public: 
         std::string DName;                   //This establishes the name of the route essentially 
         std::vector<TStopID> DStopIDs;       //This lists the Stop IDs that form the route 
@@ -71,7 +71,7 @@ CCSVBusSystem::CCSVBusSystem(std::shared_ptr<CDSVReader> stopsrc, std::shared_pt
                     DImplementation->DStops[stop->DStopID] = stop; 
                     DImplementation->DStopbyIDMap.push_back(stop); 
                 } catch (const std::exception& e){
-                    std::cer << "Caught an exception" << e.what() << "\n"; 
+                    std::cerr << "Caught an exception" << e.what() << "\n"; 
                 }
             }
         }   
@@ -87,11 +87,11 @@ CCSVBusSystem::CCSVBusSystem(std::shared_ptr<CDSVReader> stopsrc, std::shared_pt
                 TStopID stopID = std::stoul(routeRow[1]); 
                 auto& route = routeRow[rName];  
                 if (!route) {
-                    auto route = std::make_shared<SRoute>(); 
-                    route->rName = routeName; 
+                    route = std::make_shared<SRoute>(); 
+                    route->DName = rName; 
                 }
             }
-            route -> RouteStops.push_back(stopID); 
+            route -> DStopIDs.push_back(stopID); 
         }
         } catch (const std::exception& e) {
             std::cerr << "Error processing route row: " << e.what() << "\n"; 
