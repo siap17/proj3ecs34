@@ -1,4 +1,5 @@
 #include "OpenStreetMap.h"  
+#include "XMLReader.h"
 #include <expat.h>          
 #include <vector>           
 #include <unordered_map>    
@@ -279,7 +280,7 @@ COpenStreetMap::COpenStreetMap(std::shared_ptr<CXMLReader> src) {
 }
 
 // destructor
-COpenStreetMap::~COpenStreetMap() {
+COpenStreetMap::~COpenStreetMap() = default {
 }
 
 // returns the number of nodes in the map
