@@ -11,7 +11,14 @@ class CCSVBusSystem : public CBusSystem{
     private:
         struct SStop; 
         struct SRoute; 
-        struct SImplementation;
+        struct SImplementation {
+            std::vector<std::shared_ptr<SStop>> DStops;
+            std::vector<std::shared_ptr<SRoute>> DRoutes;
+            std::unordered_map<TStopID, std::shared_ptr<SStop>> DStopByIDMap;
+            std::unordered_map<std::string, std::shared_ptr<SRoute>> DRouteByNameMap;
+            SImplementation(std::shared_ptr<CDSVReader> stopsrc, std::shared_ptr<CDSVReader> routesrc);
+        };
+
         std::unique_ptr< SImplementation > DImplementation;
     public:
         CCSVBusSystem(std::shared_ptr< CDSVReader > stopsrc, std::shared_ptr< CDSVReader > routesrc);
