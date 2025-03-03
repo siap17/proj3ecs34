@@ -280,8 +280,7 @@ COpenStreetMap::COpenStreetMap(std::shared_ptr<CXMLReader> src) {
 }
 
 // destructor
-COpenStreetMap::~COpenStreetMap() = default {
-}
+COpenStreetMap::~COpenStreetMap() = default; 
 
 // returns the number of nodes in the map
 std::size_t COpenStreetMap::NodeCount() const noexcept {

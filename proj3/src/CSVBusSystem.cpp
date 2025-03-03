@@ -53,6 +53,9 @@ class CCSVBusSystem::SStop : public CBusSystem::SStop {
         std::vector<SRoute> DRoutes; 
         std::unordered_map<TStopID, std::shared_ptr<SStop>> DStopByIDMap;
         std::unordered_map<std::string, std::shared_ptr<SRoute>> DRouteByNameMap;
+
+        SImplementation(std::shared_ptr<CDSVReader> stopsrc, std::shared_ptr<CDSVReader> routesrc){} 
+
     }; 
 
 CCSVBusSystem::CCSVBusSystem(std::shared_ptr<CDSVReader> stopsrc, std::shared_ptr<CDSVReader> routesrc){
@@ -76,28 +79,26 @@ CCSVBusSystem::CCSVBusSystem(std::shared_ptr<CDSVReader> stopsrc, std::shared_pt
         }   
     }
 
-    if (routesrc){
-        std::vector<std::string> routeRow; 
-        while (routesrc->ReadRow(stopRow)){
+    if (routesrc) {
+    std::vector<std::string> routeRow; 
+    while (routesrc->ReadRow(routeRow)) {
         try {
-            if (routeRow.size() >= 2){
+            if (routeRow.size() >= 2) {
                 std::string rName = routeRow[0]; 
                 auto it = DImplementation->DRouteByNameMap.find(rName); 
-                if (it == DImplmentation ->DRouteByNameMap.end()){
-                    TRouteID routeID = DImplementation->DRoutes.size(); 
-                    SRoute route; 
-                    route.DRouteID; 
-                    route.DName = rName; 
-                    DImplementation-> DRoutes.push_back(route); 
-                    DImplementation->DRouteByNameMap[rName] = std::make_shared<SRoute>(route);  
+                if (it == DImplementation->DRouteByNameMap.end()) {
+                    auto route = std::make_shared<SRoute>(); 
+                    route->DName = rName; 
+                    DImplementation->DRoutes.push_back(*route); 
+                    DImplementation->DRouteByNameMap[rName] = route;  
                 }
-               DRouteByNameMap[rName]->DStopIDs.push_back(std::stoul(routeRow[1])); 
-            } catch (const std::exception& e){
-                std:: cerr<<"Error processing route row" << e.what() << "\n"; 
+                DImplementation->DRouteByNameMap[rName]->DStopIDs.push_back(std::stoul(routeRow[1])); 
             }
-            }
+        } catch (const std::exception& e) {
+            std::cerr << "Error processing route row: " << e.what() << "\n"; 
         }
     }
+}
 
 };
 
@@ -148,34 +149,33 @@ std::shared_ptr<CBusSystem::SRoute> CCSVBusSystem::RouteByName(const std::string
     return nullptr; 
 }
 
-std::ostream& operator<<(std::ostream& os, const CCSVBusSystem& busSystem){
+std::ostream& operator<<(std::ostream& os, const CCSVBusSystem& busSystem) {
     os << "Bus System Details:\n"; 
-    os <<"Stop Count: " << busSystem.StopCount() << "\n"; 
-    for (std::size_t i = 0; i < busSystem.stopCount(); ++i){
-        auto stopPtr = busSystem.StopbyIndex(i); 
-        if (stopPtr){
-            os << "Stop" << i << ": ID = " << stopPtr->ID() 
-               <<", NodeID = " << stopPtr->NodeID() << "\n"; 
+    os << "Stop Count: " << busSystem.StopCount() << "\n"; 
+    for (std::size_t i = 0; i < busSystem.StopCount(); ++i) {
+        auto stopPtr = busSystem.StopByIndex(i); 
+        if (stopPtr) {
+            os << "Stop " << i << ": ID = " << stopPtr->ID() 
+               << ", NodeID = " << stopPtr->NodeID() << "\n"; 
         }
     }
 
-    os << "Route Count: " <<busSystem.RouteCount() << "\n"; 
-    for (std::size_t i = 0; i<busSystem.RouteCount(); ++i){
+    os << "Route Count: " << busSystem.RouteCount() << "\n"; 
+    for (std::size_t i = 0; i < busSystem.RouteCount(); ++i) {
         auto routePtr = busSystem.RouteByIndex(i); 
-        if (routePtr){
-            os << "Route " << i  << ": Name = " << routePtr->Name()
-               << ", StopCount =" << routePtr->StopCount() << "\n"; 
-            os "Stops: "; 
+        if (routePtr) {
+            os << "Route " << i << ": Name = " << routePtr->Name()
+               << ", StopCount = " << routePtr->StopCount() << "\n"; 
+            os << "Stops: "; 
 
-            for (std::size_t j = 0; j < routePTr->StopCount(); ++j){
-                os <<routePtr->GetStopID(j); 
-                if (j < routePtr->StopCount() - 1){
+            for (std::size_t j = 0; j < routePtr->StopCount(); ++j) {
+                os << routePtr->GetStopID(j); 
+                if (j < routePtr->StopCount() - 1) {
                     os << ", "; 
                 }
-                os << "\n"; 
             }
+            os << "\n"; 
         }
-
-        return os; 
     }
+    return os; 
 }
