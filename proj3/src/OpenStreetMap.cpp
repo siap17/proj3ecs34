@@ -1,6 +1,7 @@
 #include "OpenStreetMap.h"  
 #include "XMLReader.h"
-#include <expat.h>          
+#include <expat.h>    
+#include <stdexcept>       
 #include <vector>           
 #include <unordered_map>    
 #include <string>           
