@@ -7,7 +7,6 @@
 #include <iostream> 
 #include <sstream> 
 
-using TRouteID = unsigned int; 
 
 // Private Implementation
 class CCSVBusSystem::SStop : public CBusSystem::SStop {
@@ -24,7 +23,7 @@ class CCSVBusSystem::SStop : public CBusSystem::SStop {
         }
     }; 
 
-    class CCSVBusSystem::SRoute : public CBusSystem::SRoute {
+class CCSVBusSystem::SRoute : public CBusSystem::SRoute {
     public: 
         std::string DName;                   //This establishes the name of the route essentially 
         std::vector<TStopID> DStopIDs;       //This lists the Stop IDs that form the route 
@@ -48,12 +47,15 @@ class CCSVBusSystem::SStop : public CBusSystem::SStop {
         }
     }; 
 
-    SImplementation(std::shared_ptr<CDSVReader> stopsrc, std::shared_ptr<CDSVReader> routesrc){
-        std::vector<SStop> DStops; 
-        std::vector<SRoute> DRoutes; 
+    struct CCSVBusSystem::SImplementation{
         std::unordered_map<TStopID, std::shared_ptr<SStop>> DStopByIDMap;
         std::unordered_map<std::string, std::shared_ptr<SRoute>> DRouteByNameMap;
+        std::vector<std::shared_ptr<SStop>> DStops; 
+        std::vector<std::shared_ptr<SRoute>> DRoutes; 
 
+        SImplementation(std::shared_ptr<CDSVReader> stopsrc, std::shared_ptr<routesrc>){
+
+        }
     }; 
 
 CCSVBusSystem::CCSVBusSystem(std::shared_ptr<CDSVReader> stopsrc, std::shared_ptr<CDSVReader> routesrc){
@@ -85,10 +87,11 @@ CCSVBusSystem::CCSVBusSystem(std::shared_ptr<CDSVReader> stopsrc, std::shared_pt
                 try{
                 std::string rName = routeRow[0]; 
                 TStopID stopID = std::stoul(routeRow[1]); 
-                auto& route = routeRow[rName];  
+                auto& route = DImplementation-> DRouteByNameMap[rName];  
                 if (!route) {
                     route = std::make_shared<SRoute>(); 
                     route->DName = rName; 
+                    DImplementation->DRoutes.push_back(route); 
                     }
                 }
                 route -> DStopIDs.push_back(stopID); 
@@ -138,8 +141,7 @@ std::shared_ptr<CBusSystem::SStop> CCSVBusSystem::StopByID(TStopID id) const noe
 
 std::shared_ptr<CBusSystem::SRoute> CCSVBusSystem::RouteByIndex(std::size_t index) const noexcept { 
     if (index < DImplementation->DRoutes.size()){
-        const auto& route = DImplementation->DRoutes[index]; 
-        return DImplementation->DRouteByNameMap[route.DName];
+        return DImplementation->DRoutes[index];
     }
     return nullptr;
 }
