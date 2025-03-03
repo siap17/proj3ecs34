@@ -61,20 +61,17 @@ CCSVBusSystem::CCSVBusSystem(std::shared_ptr<CDSVReader> stopsrc, std::shared_pt
 
     
     if (stopsrc){
-
         while (stopsrc->ReadRow(stopRow)){
             if (stopRow.size() >= 2){
-                SStop stop; 
-                stop.DStopID = std::stoul(stopRow[0]); 
-                stop.DName = stopRow[1]; 
-
-                if (stopRow.size() >= 4){
-                    stop.DLatitude=std::stod(stopRow[2]); 
-                    stop.Dlongitude=std::stod(stopRow[3]); 
+                try {
+                    auto stop = std::make_shared<SStop>(); 
+                    stop->DStopID=std::stoul(stopRow[0]); 
+                    stop->NodeIDVal = std::stoul(stopRow[1])
+                    DImplementation->DStops[stop->DStopID] = stop; 
+                    DImplementation->DStopbyIDMap.push_back(stop); 
+                } catch (const std::exception& e){
+                    std::cer << "Caught an exception" << e.what() << "\n"; 
                 }
-
-                DStops.push_back(stop);
-                DStopByIDMap[stop.DStopID] = std::make_shared<SStop>(stop); 
             }
         }   
     }
