@@ -67,9 +67,9 @@ CCSVBusSystem::CCSVBusSystem(std::shared_ptr<CDSVReader> stopsrc, std::shared_pt
                 try {
                     auto stop = std::make_shared<SStop>(); 
                     stop->DStopID=std::stoul(stopRow[0]); 
-                    stop->NodeIDVal = std::stoul(stopRow[1])
+                    stop->NodeIDVal = std::stoul(stopRow[1]); 
                     DImplementation->DStops[stop->DStopID] = stop; 
-                    DImplementation->DStopbyIDMap.push_back(stop); 
+                    DImplementation->DStopByIDMap[stop->DStopID] = stop;
                 } catch (const std::exception& e){
                     std::cerr << "Caught an exception" << e.what() << "\n"; 
                 }
