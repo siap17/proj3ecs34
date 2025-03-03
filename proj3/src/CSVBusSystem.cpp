@@ -4,56 +4,63 @@
 #include <memory>
 #include <unordered_map> 
 #include <string> 
+#include <iostream> 
 #include <sstream> 
 
 using TRouteID = unsigned int; 
 
 // Private Implementation
-struct CCSVBusSystem::SImplementation {
-    struct SStop : public CBusSystem::SStop{
+class CCSVBusSystem::SStop : public CBusSystem::SStop {
+    public: 
         TStopID DStopID; 
-        std:: string DName; 
-        double DLatitude; 
-        double Dlongitude;
+        CStreetMap::TNodeID NodeIDVal; 
 
         TStopID ID() const noexcept override {
             return DStopID; 
         } 
 
         CStreetMap::TNodeID NodeID() const noexcept override {
-            return static_cast<CStreetMap::TNodeID>(DStopID); 
+            return NodeIDVal; 
         }
     }; 
 
-    struct SRoute : public CBusSystem::SRoute {
-        TRouteID DRouteID; 
-        std::string DName; 
-        std::vector<TStopID> DStopIDs; 
+    class CCSVBusSystem:: SRoute : public CBusSystem::SRoute {
+    public: 
+        std::string DName;                   //This establishes the name of the route essentially 
+        std::vector<TStopID> DStopIDs;       //This lists the Stop IDs that form the route 
 
-        std::string Name() const noexcept override{
+        // This returns the name of the route hence why we call on override 
+        std::string Name() const noexcept override{ 
             return DName; 
         }
 
+        //This returns the size "aka" number of stopping points int he route 
         std::size_t StopCount() const noexcept override{ 
             return DStopIDs.size(); 
         }
 
+        //This returns the stop ID to the corresponding index 
         TStopID GetStopID(std::size_t index) const noexcept override{
             if (index < DStopIDs.size()){
                 return DStopIDs[index]; 
             }
-            return 0; 
+            return CBusSystem::InvalidStopID;    //Otherwise it would return an invalid ID 
         }
     }; 
 
-    std::vector<SStop> DStops; 
-    std::vector<SRoute> DRoutes; 
-    std::unordered_map<TStopID, std::shared_ptr<SStop>> DStopByIDMap;
-    std::unordered_map<std::string, std::shared_ptr<SRoute>> DRouteByNameMap;
-
     SImplementation(std::shared_ptr<CDSVReader> stopsrc, std::shared_ptr<CDSVReader> routesrc){
-        std:: vector<std::string> stopRow; 
-        stopsrc->ReadRow(stopRow); 
+        std::vector<SStop> DStops; 
+        std::vector<SRoute> DRoutes; 
+        std::unordered_map<TStopID, std::shared_ptr<SStop>> DStopByIDMap;
+        std::unordered_map<std::string, std::shared_ptr<SRoute>> DRouteByNameMap;
+    }; 
+
+CCSVBusSystem::CCSVBusSystem(std::shared_ptr<CDSVReader> stopsrc, std::shared_ptr<CDSVReader> routesrc){
+    DImplementation = std::make_unique<SImplementation>(stopsrc, routesrc); 
+    std:: vector<std::string> stopRow; 
+
+    
+    if (stopsrc){
 
         while (stopsrc->ReadRow(stopRow)){
             if (stopRow.size() >= 2){
@@ -69,14 +76,12 @@ struct CCSVBusSystem::SImplementation {
                 DStops.push_back(stop);
                 DStopByIDMap[stop.DStopID] = std::make_shared<SStop>(stop); 
             }
-        }
+        }   
+    }
 
-        std::vector<std::string> routeRow; 
-        routesrc->ReadRow(routeRow); 
-
-
-        while (routesrc ->ReadRow(routeRow)){
-            if (routeRow.size() >= 2){
+    if (routesrc){
+        while (routesrc->ReadRow(stopRow)){
+            if (stopRow.size() >= 2){
                 std::string rName = routeRow[0]; 
                 auto RoutingID = DRouteByNameMap.find(rName); 
 
@@ -89,13 +94,11 @@ struct CCSVBusSystem::SImplementation {
                 }
                DRouteByNameMap[rName]->DStopIDs.push_back(std::stoul(routeRow[1])); 
             }
-
         }
     }
+
 };
 
-CCSVBusSystem::CCSVBusSystem(std::shared_ptr<CDSVReader> stopsrc, std::shared_ptr<CDSVReader> routesrc) 
-    : DImplementation(std::make_unique<SImplementation>(stopsrc, routesrc)) {}
 
 
 CCSVBusSystem::~CCSVBusSystem() = default;
@@ -142,3 +145,5 @@ std::shared_ptr<CBusSystem::SRoute> CCSVBusSystem::RouteByName(const std::string
     }
     return nullptr; 
 }
+
+
