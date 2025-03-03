@@ -78,20 +78,21 @@ CCSVBusSystem::CCSVBusSystem(std::shared_ptr<CDSVReader> stopsrc, std::shared_pt
     }
 
     if (routesrc) {
-    std::vector<std::string> routeRow; 
-    while (routesrc->ReadRow(routeRow)) {
+    std::unordered_map<std::string, std::shared_ptr<SRoute>> routeRow; 
+    while (routesrc->ReadRow(stopRow)) {
         try {
-            if (routeRow.size() >= 2) {
+            if (stopRow.size() >= 2) {
+                try{
                 std::string rName = routeRow[0]; 
-                auto it = DImplementation->DRouteByNameMap.find(rName); 
-                if (it == DImplementation->DRouteByNameMap.end()) {
+                TStopID stopID = std::stoul(routeRow[1]); 
+                auto& route = routeRow[rName];  
+                if (!route) {
                     auto route = std::make_shared<SRoute>(); 
-                    route->DName = rName; 
-                    DImplementation->DRoutes.push_back(*route); 
-                    DImplementation->DRouteByNameMap[rName] = route;  
+                    route->rName = routeName; 
                 }
-                DImplementation->DRouteByNameMap[rName]->DStopIDs.push_back(std::stoul(routeRow[1])); 
             }
+            route -> RouteStops.push_back(stopID); 
+        }
         } catch (const std::exception& e) {
             std::cerr << "Error processing route row: " << e.what() << "\n"; 
         }
