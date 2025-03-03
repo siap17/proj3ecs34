@@ -1,6 +1,6 @@
 #include "CSVBusSystem.h"
-#include "DSVReader.h"  // Assumed header for CDSVReader
-#include "BusSystem.h"  // Assumed header for CBusSystem definitions
+#include "DSVReader.h"  
+#include "BusSystem.h"  
 #include <gtest/gtest.h>
 #include <vector>
 #include <string>
@@ -18,7 +18,8 @@ public:
         , CDSVReader(nullptr, ',')
     {}
 
-    bool ReadRow(std::vector<std::string>& row) override {
+    // The signature must exactly match the one in CDSVReader
+    bool ReadRow(std::vector<std::string>& row) {
         if (DCurrentRow < DData.size()) {
             row = DData[DCurrentRow++];
             return true;
