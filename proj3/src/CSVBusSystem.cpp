@@ -70,7 +70,7 @@ CCSVBusSystem::CCSVBusSystem(std::shared_ptr<CDSVReader> stopsrc, std::shared_pt
                     auto stop = std::make_shared<SStop>(); 
                     stop->DStopID=std::stoul(stopRow[0]); 
                     stop->NodeIDVal = std::stoul(stopRow[1]); 
-                    DImplementation->DStops[stop->DStopID] = stop; 
+                    DImplementation->DStops.push_back(stop); 
                     DImplementation->DStopByIDMap[stop->DStopID] = stop;
                 } catch (const std::exception& e){
                     std::cerr << "Caught an exception" << e.what() << "\n"; 
@@ -80,35 +80,33 @@ CCSVBusSystem::CCSVBusSystem(std::shared_ptr<CDSVReader> stopsrc, std::shared_pt
     }
 
     if (routesrc) {
-    std::unordered_map<std::string, std::shared_ptr<SRoute>> routeRow; 
-    while (routesrc->ReadRow(stopRow)) {
-        try {
-            if (stopRow.size() >= 2) {
-                try{
-                std::string rName = routeRow[0]; 
-                TStopID stopID = std::stoul(routeRow[1]); 
-                auto& route = DImplementation-> DRouteByNameMap[rName];  
-                if (!route) {
-                    route = std::make_shared<SRoute>(); 
-                    route->DName = rName; 
-                    DImplementation->DRoutes.push_back(route); 
+        std::unordered_map<std::string, std::shared_ptr<SRoute>> routeMap;
+
+        while (routesrc->ReadRow(row)) {
+            if (row.size() >= 2) {
+                try {
+                    std::string rName = row[0];
+                    TStopID stopID = std::stoul(row[1]);
+                    
+                    auto& route = routeMap[rName];
+                    if (!route) {
+                        route = std::make_shared<SRoute>();
+                        route->DName = rName;
                     }
+                    route->DStopIDs.push_back(stopID);
+                } catch (const std::exception& e) {
+                    std::cerr << "Error processing route row: " << e.what() << "\n";
                 }
-                route -> DStopIDs.push_back(stopID); 
             }
-        } catch (const std::exception& e) {
-            std::cerr << "Error processing route row: " << e.what() << "\n"; 
+        }
+
+        // Transfer routes to implementation
+        for (const auto& pair : routeMap) {
+            DImplementation->DRouteByNameMap[pair.first] = pair.second;
+            DImplementation->DRoutes.push_back(pair.second);
         }
     }
-
-    for (const auto& p : routeRow){
-        DImplementation->DRouteByNameMap[p.first] = p.second; 
-        DImplmentation->DRoutes.push_back(p.second); 
-    }
 }
-
-};
-
 
 
 CCSVBusSystem::~CCSVBusSystem() = default;
