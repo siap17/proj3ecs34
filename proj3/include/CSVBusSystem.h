@@ -10,8 +10,8 @@
 
 class CCSVBusSystem : public CBusSystem{
     private:
-        struct SStop; 
-        struct SRoute; 
+        class SStop; 
+        class SRoute; 
         struct SImplementation 
         std::unique_ptr< SImplementation > DImplementation;
     public:
@@ -26,4 +26,5 @@ class CCSVBusSystem : public CBusSystem{
         std::shared_ptr<SRoute> RouteByName(const std::string &name) const noexcept override;
 };
 
+std::ostream& operator<<(std::ostream& os, const CCSVBusSystem& busSystem); 
 #endif
