@@ -32,10 +32,10 @@ protected:
 // **CDSVWriter Tests**
 
 // Test that WriteRow fails initially (before implementation)
-TEST_F(DSVTest, WriteRowFailsInitially) {
-    std::vector<std::string> row = {"Cat", "17", "New York"};
-    EXPECT_FALSE(Writer->WriteRow(row));  // Should fail at first
-}
+//TEST_F(DSVTest, WriteRowFailsInitially) {
+   // std::vector<std::string> row = {"Cat", "17", "New York"};
+  //  EXPECT_FALSE(Writer->WriteRow(row));  // Should fail at first
+//}
 
 // Test writing a single row
 TEST_F(DSVTest, WriteSingleRow) {
