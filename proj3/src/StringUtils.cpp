@@ -65,9 +65,12 @@ std::string Center(const std::string &str, int width, char fill) noexcept{
     if (str.size() >= width){
         return str;
     }
-    int padding = (width - str.size()) / 2;
-    int right_padding = width - str.size() - padding; 
-    std::string res(padding, fill);
+    int total_pad = width - str.size(); 
+    int left_padding = total_pad / 2;
+    int right_padding = total_pad-left_padding; 
+
+    
+    std::string res(left_padding, fill);
     res += str;
     res.append(right_padding, fill);
     return res;
@@ -77,8 +80,9 @@ std::string LJust(const std::string &str, int width, char fill) noexcept{
     if (str.size() >= width) {
         return str;
     }
-    std::string res = str;
-    res.append(width - str.size(), fill);
+    std::string res = str; 
+    int padding = width - str.size(); 
+    res.append(padding, fill);
     return res;
 }
 
@@ -86,7 +90,9 @@ std::string RJust(const std::string &str, int width, char fill) noexcept{
     if (str.size() >= width){
         return str;
     }
-    std::string res(width-str.size(),fill);
+    int padding = width - str.size(); 
+    
+    std::string res(padding, fill);
     res += str;
     return res;
 }
