@@ -70,9 +70,10 @@ TEST(StringUtilsTest, Join) {
     EXPECT_EQ(result, "pastaisyummy");
 }
 
-TEST(StringUtilsTest, ExpandTabs) {
-    std::string str = "new\tyork";
-    EXPECT_EQ(StringUtils::ExpandTabs(str, 4), "new    york");  // Fixed: Correct tab expansion
+TEST(StringUtilsTest, ExpandTabs){
+    EXPECT_EQ(StringUtils::ExpandTabs("hello\tworld", 4), "hello    world");
+    EXPECT_EQ(StringUtils::ExpandTabs("\t", 4), "    ");
+    EXPECT_EQ(StringUtils::ExpandTabs("hello\t", 8), "hello   "); 
 }
 
 TEST(StringUtilsTest, EditDistance) {
