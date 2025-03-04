@@ -39,17 +39,17 @@ TEST(StringUtilsTest, Strip) {
 
 TEST(StringUtilsTest, Center) {
     std::string str = "cats";
-    EXPECT_EQ(StringUtils::Center(str, 10), "   cats   ");  // Fixed: Added extra space
+    EXPECT_EQ(StringUtils::Center(str, 10), "   cats   ");
 }
 
 TEST(StringUtilsTest, LJust) {
     std::string str = "cats";
-    EXPECT_EQ(StringUtils::LJust(str, 10), "cats      ");  // Fixed: Added extra space
+    EXPECT_EQ(StringUtils::LJust(str, 10), "cats      ");
 }
 
 TEST(StringUtilsTest, RJust) {
     std::string str = "cats";
-    EXPECT_EQ(StringUtils::RJust(str, 10), "      cats");  // Fixed: Added extra space
+    EXPECT_EQ(StringUtils::RJust(str, 10), "      cats");
 }
 
 TEST(StringUtilsTest, Replace) {
