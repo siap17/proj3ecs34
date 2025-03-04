@@ -173,6 +173,8 @@ std::string ExpandTabs(const std::string &str, int tabsize) noexcept {
         if (c == '\t') {
             // calculate the number of spaces needed to reach the next tab stop
             size_t spaces = tabsize - (column % tabsize);
+        if (spaces == tabsize) spaces = 0;  // Prevent extra spaces at aligned positions
+
             result.append(spaces, ' ');  // append the spaces to the result
             column += spaces;            // update the column position
         } else if (c == '\n') {
