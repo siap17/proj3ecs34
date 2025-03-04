@@ -56,7 +56,30 @@ TEST(CCSVBusSystemTest, StopCount) {
     EXPECT_EQ(busSystem.StopCount(), 3);
 }
 
+// Test case: Verify that StopByID returns the correct stop.
+TEST(CCSVBusSystemTest, StopByID) {
+    std::vector<std::vector<std::string>> stopData = {
+        {"1", "1001"},
+        {"2", "1002"},
+        {"3", "1003"}
+    };
 
+    std::vector<std::vector<std::string>> routeData = {
+        {"Route 1", "1"},
+        {"Route 1", "2"},
+        {"Route 2", "3"}
+    };
+
+    auto stopsrc = std::make_shared<MockDSVReader>(stopData);
+    auto routesrc = std::make_shared<MockDSVReader>(routeData);
+
+    CCSVBusSystem busSystem(stopsrc, routesrc);
+
+    auto stop = busSystem.StopByID(2);
+    ASSERT_NE(stop, nullptr);
+    EXPECT_EQ(stop->ID(), 2);
+    EXPECT_EQ(stop->NodeID(), 1002);
+}
 
 // Test case: Verify that RouteByName returns the correct route.
 TEST(CCSVBusSystemTest, RouteByName) {
