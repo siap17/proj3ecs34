@@ -155,38 +155,43 @@ std::string Join(const std::string &str, const std::vector< std::string > &vect)
 
 // For ExpandTabs function:
 std::string ExpandTabs(const std::string &str, int tabsize) noexcept {
-    std::string result;  // resulting string with expanded tabs
-    size_t column = 0;   // current column position in the string
+    // resulting string with expanded tabs
+    std::string result;  
+    // current column position in the string
+    size_t column = 0;   
 
     // if tab size is 0, remove all tabs from the string
     if (tabsize == 0) {
         for (char c : str) {
             if (c != '\t') {
-                result += c;  // append non-tab characters to the result
+            // append non-tab characters to the result
+                result += c;  
             }
         }
-        return result;  // return the string with tabs removed
+        // return the string with tabs removed
+        return result;  
     }
 
     // process the input string and expand tabs
     for (char c : str) {
         if (c == '\t') {
-            // calculate the number of spaces needed to reach the next tab stop
+            // calculate the number of spaces needed to reach the next tab 
             size_t spaces = tabsize - (column % tabsize);
-        if (spaces == tabsize) spaces = 0;  // Prevent extra spaces at aligned positions
-
-            result.append(spaces, ' ');  // append the spaces to the result
-            column += spaces;            // update the column position
-        } else if (c == '\n') {
-            result += c;  // append the newline character
-            column = 0;    // reset the column position for the next line
+ // append the spaces to the result
+            result.append(spaces, ' '); 
+// update the column position
+            column += spaces;  
         } else {
-            result += c;  // append non-tab characters to the result
-            column++;     // increment the column position
+            // append non-tab characters to the result
+            result += c;  
+ // increment the column position
+            column++;    
         }
     }
-    return result;  // return the string with expanded tabs
+// return the string with expanded tabs
+    return result;  
 }
+
 
 
 
