@@ -75,8 +75,7 @@ This example demonstrates the basic technique for overloading the << operator. Y
 
 For CSVBusSystem, I did also have to use some outside sources to figure out how to link my classes and SImplementation to my header files. Here is a link to a YouTube video I used and my chat with 
 
-YouTube Video Link: [
-](https://www.google.com/url?sa=t&source=web&rct=j&opi=89978449&url=https://www.youtube.com/watch%3Fv%3Dru_u9N7jydU&ved=2ahUKEwivzaOX3e-LAxXqIUQIHX7hAywQwqsBegQIDxAG&usg=AOvVaw3kDX7YNxe-GauvSY0nBHNS)
+YouTube Video Link: https://www.google.com/url?sa=t&source=web&rct=j&opi=89978449&url=https://www.youtube.com/watch%3Fv%3Dru_u9N7jydU&ved=2ahUKEwivzaOX3e-LAxXqIUQIHX7hAywQwqsBegQIDxAG&usg=AOvVaw3kDX7YNxe-GauvSY0nBHNS
 
 Conversation with ChatGPT: 
 
