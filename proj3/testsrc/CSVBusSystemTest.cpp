@@ -3,21 +3,23 @@
 #include "BusSystem.h"  
 #include <gtest/gtest.h>
 #include <vector>
-#include <unordered_map> 
 #include <string>
 #include <memory>
 #include <sstream>
 
-// A more robust implementation of MockDSVReader for testing purposes
+// A concrete implementation of CDSVReader for testing purposes.
+// This mock simply returns rows from a preloaded vector.
 class MockDSVReader : public CDSVReader {
 public:
-    // Constructor that takes the data to be returned row by row
+    // The CSV data: each inner vector represents one row.
     MockDSVReader(const std::vector<std::vector<std::string>>& data)
-        : DData(data), DCurrentRow(0), CDSVReader(nullptr, ',')
+        : DData(data), DCurrentRow(0),
+        // Call the base class constructor with dummy values.
+        CDSVReader(nullptr, ',')
     {}
 
-    // Overriding the ReadRow method to provide mock data
-    bool ReadRow(std::vector<std::string>& row) override {
+    // The ReadRow method implementation (without override)
+    bool ReadRow(std::vector<std::string>& row) {
         if (DCurrentRow < DData.size()) {
             row = DData[DCurrentRow++];
             return true;
@@ -25,9 +27,9 @@ public:
         return false;
     }
 
-    // Method implementations required by CDSVReader base class
-    bool End() const override { 
-        return DCurrentRow >= DData.size(); 
+    // End method implementation (without override)
+    bool End() const {
+        return DCurrentRow >= DData.size();
     }
 
 private:
