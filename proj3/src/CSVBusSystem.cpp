@@ -47,7 +47,7 @@ class CCSVBusSystem::SRoute : public CBusSystem::SRoute {
         }
     }; 
 
-    struct CCSVBusSystem::SImplementation{
+   struct CCSVBusSystem::SImplementation{
         std::vector<std::shared_ptr<SStop>> DStops; 
         std::vector<std::shared_ptr<SRoute>> DRoutes; 
         std::unordered_map<TStopID, std::shared_ptr<SStop>> DStopByIDMap;
@@ -56,7 +56,15 @@ class CCSVBusSystem::SRoute : public CBusSystem::SRoute {
 
         SImplementation(std::shared_ptr<CDSVReader> stopsrc, std::shared_ptr<CDSVReader>routesrc){
 
-        if (stopsrc){
+        }
+    }; 
+
+CCSVBusSystem::CCSVBusSystem(std::shared_ptr<CDSVReader> stopsrc, std::shared_ptr<CDSVReader> routesrc){
+    DImplementation = std::make_unique<SImplementation>(stopsrc, routesrc); 
+    std:: vector<std::string> stopRow; 
+
+    
+    if (stopsrc){
         while (stopsrc->ReadRow(stopRow)){
             if (stopRow.size() >= 2){
                 try {
@@ -99,14 +107,6 @@ class CCSVBusSystem::SRoute : public CBusSystem::SRoute {
             DImplementation->DRoutes.push_back(pair.second);
         }
     }
-        
-}
-}; 
-    
-
-CCSVBusSystem::CCSVBusSystem(std::shared_ptr<CDSVReader> stopsrc, std::shared_ptr<CDSVReader> routesrc){
-    DImplementation = std::make_unique<SImplementation>(stopsrc, routesrc); 
-    std:: vector<std::string> stopRow; 
 }
 
 
