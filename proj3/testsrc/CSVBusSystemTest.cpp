@@ -3,28 +3,31 @@
 #include "BusSystem.h"  
 #include <gtest/gtest.h>
 #include <vector>
+#include <unordered_map> 
 #include <string>
 #include <memory>
 #include <sstream>
 
-// A concrete implementation of CDSVReader for testing purposes.
-// This mock simply returns rows from a preloaded vector.
+// A more robust implementation of MockDSVReader for testing purposes
 class MockDSVReader : public CDSVReader {
 public:
-    // The CSV data: each inner vector represents one row.
+    // Constructor that takes the data to be returned row by row
     MockDSVReader(const std::vector<std::vector<std::string>>& data)
-        : DData(data), DCurrentRow(0)
-        // Call the base class constructor with dummy values.
-        , CDSVReader(nullptr, ',')
+        : DData(data), DCurrentRow(0), CDSVReader(nullptr, ',')
     {}
 
-    // The signature must exactly match the one in CDSVReader
-    bool ReadRow(std::vector<std::string>& row) {
+    // Overriding the ReadRow method to provide mock data
+    bool ReadRow(std::vector<std::string>& row) override {
         if (DCurrentRow < DData.size()) {
             row = DData[DCurrentRow++];
             return true;
         }
         return false;
+    }
+
+    // Method implementations required by CDSVReader base class
+    bool End() const override { 
+        return DCurrentRow >= DData.size(); 
     }
 
 private:
@@ -43,9 +46,9 @@ TEST(CCSVBusSystemTest, StopCount) {
 
     // Sample CSV data for routes.
     std::vector<std::vector<std::string>> routeData = {
-        {"Route 1", "1"},
-        {"Route 1", "2"},
-        {"Route 2", "3"}
+        {"Route1", "1"},
+        {"Route1", "2"},
+        {"Route2", "3"}
     };
 
     auto stopsrc = std::make_shared<MockDSVReader>(stopData);
@@ -65,9 +68,9 @@ TEST(CCSVBusSystemTest, StopByID) {
     };
 
     std::vector<std::vector<std::string>> routeData = {
-        {"Route 1", "1"},
-        {"Route 1", "2"},
-        {"Route 2", "3"}
+        {"Route1", "1"},
+        {"Route1", "2"},
+        {"Route2", "3"}
     };
 
     auto stopsrc = std::make_shared<MockDSVReader>(stopData);
@@ -90,9 +93,9 @@ TEST(CCSVBusSystemTest, RouteByName) {
     };
 
     std::vector<std::vector<std::string>> routeData = {
-        {"Route 1", "1"},
-        {"Route 1", "2"},
-        {"Route 2", "3"}
+        {"Route1", "1"},
+        {"Route1", "2"},
+        {"Route2", "3"}
     };
 
     auto stopsrc = std::make_shared<MockDSVReader>(stopData);
@@ -100,9 +103,9 @@ TEST(CCSVBusSystemTest, RouteByName) {
 
     CCSVBusSystem busSystem(stopsrc, routesrc);
 
-    auto route = busSystem.RouteByName("Route 1");
+    auto route = busSystem.RouteByName("Route1");
     ASSERT_NE(route, nullptr);
-    EXPECT_EQ(route->Name(), "Route 1");
+    EXPECT_EQ(route->Name(), "Route1");
     EXPECT_EQ(route->StopCount(), 2);
     EXPECT_EQ(route->GetStopID(0), 1);
     EXPECT_EQ(route->GetStopID(1), 2);
@@ -116,8 +119,8 @@ TEST(CCSVBusSystemTest, OutputOperator) {
     };
 
     std::vector<std::vector<std::string>> routeData = {
-        {"Route 1", "1"},
-        {"Route 1", "2"}
+        {"Route1", "1"},
+        {"Route1", "2"}
     };
 
     auto stopsrc = std::make_shared<MockDSVReader>(stopData);
