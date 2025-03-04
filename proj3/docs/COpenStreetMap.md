@@ -19,11 +19,12 @@ FindNearestRoad(lat, lon) locates the closest road segment to the specified coor
 In lines 72-80 the destructor makes sure that we do proper cleanup of the ExpatParser.
 
 here is some example usage:
-  std::shared_ptr<CDataSource> osmSource = std::make_shared<CFileSource>("map.osm");
-  COpenStreetMap map(osmSource);
-  
-  
-  auto coords = map.GetIntersection(123456); // get an intersections coordinates
-  std::cout << "Intersection at: " << coords.first << ", " << coords.second << std::endl;
+
+    std::shared_ptr<CDataSource> osmSource = std::make_shared<CFileSource>("map.osm");
+    COpenStreetMap map(osmSource);
+    
+    
+    auto coords = map.GetIntersection(123456); // get an intersections coordinates
+    std::cout << "Intersection at: " << coords.first << ", " << coords.second << std::endl;
 
 this above code loads an OSM file using COpenStreetMap, extracts intersection data, and prints the coordinates.
