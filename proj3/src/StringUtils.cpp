@@ -155,32 +155,35 @@ std::string Join(const std::string &str, const std::vector< std::string > &vect)
 
 // For ExpandTabs function:
 std::string ExpandTabs(const std::string &str, int tabsize) noexcept {
-    std::string res;
-    int col = 0;  // Current column position
+    std::string result;  // resulting string with expanded tabs
+    size_t column = 0;   // current column position in the string
 
+    // if tab size is 0, remove all tabs from the string
     if (tabsize == 0) {
         for (char c : str) {
-            if (c != '\t') {  // Remove tabs completely
-                res += c;
+            if (c != '\t') {
+                result += c;  // append non-tab characters to the result
             }
         }
-        return res;
+        return result;  // return the string with tabs removed
     }
 
+    // process the input string and expand tabs
     for (char c : str) {
         if (c == '\t') {
-            int spaces = tabsize - (col % tabsize);  // Calculate spaces needed to align
-            col += spaces;
-            res.append(spaces, ' ');
+            // calculate the number of spaces needed to reach the next tab stop
+            size_t spaces = tabsize - (column % tabsize);
+            result.append(spaces, ' ');  // append the spaces to the result
+            column += spaces;            // update the column position
         } else if (c == '\n') {
-            res += c;  // Add the newline character
-            col = 0;    // Reset column position for the next line
+            result += c;  // append the newline character
+            column = 0;    // reset the column position for the next line
         } else {
-            res += c;  // Add the character
-            col++;     // Increment column position
+            result += c;  // append non-tab characters to the result
+            column++;     // increment the column position
         }
     }
-    return res;
+    return result;  // return the string with expanded tabs
 }
 
 
