@@ -62,7 +62,7 @@ std::string Strip(const std::string &str) noexcept{
 }
 
 std::string Center(const std::string &str, int width, char fill) noexcept{
-    if (str.size() >= width){
+    if (str.size() >= static_cast<size_t>(width)) {
         return str;
     }
     int total_pad = width - str.size(); 
@@ -77,7 +77,7 @@ std::string Center(const std::string &str, int width, char fill) noexcept{
 }
 
 std::string LJust(const std::string &str, int width, char fill) noexcept{
-    if (str.size() >= width) {
+    if (str.size() >= static_cast<size_t>(width)) {
         return str;
     }
     std::string res = str; 
@@ -87,7 +87,7 @@ std::string LJust(const std::string &str, int width, char fill) noexcept{
 }
 
 std::string RJust(const std::string &str, int width, char fill) noexcept{
-    if (str.size() >= width){
+    if (str.size() >= static_cast<size_t>(width)) {
         return str;
     }
     int padding = width - str.size(); 
