@@ -56,15 +56,7 @@ class CCSVBusSystem::SRoute : public CBusSystem::SRoute {
 
         SImplementation(std::shared_ptr<CDSVReader> stopsrc, std::shared_ptr<CDSVReader>routesrc){
 
-        }
-    }; 
-
-CCSVBusSystem::CCSVBusSystem(std::shared_ptr<CDSVReader> stopsrc, std::shared_ptr<CDSVReader> routesrc){
-    DImplementation = std::make_unique<SImplementation>(stopsrc, routesrc); 
-    std:: vector<std::string> stopRow; 
-
-    
-    if (stopsrc){
+        if (stopsrc){
         while (stopsrc->ReadRow(stopRow)){
             if (stopRow.size() >= 2){
                 try {
@@ -107,6 +99,14 @@ CCSVBusSystem::CCSVBusSystem(std::shared_ptr<CDSVReader> stopsrc, std::shared_pt
             DImplementation->DRoutes.push_back(pair.second);
         }
     }
+        
+}
+}; 
+    
+
+CCSVBusSystem::CCSVBusSystem(std::shared_ptr<CDSVReader> stopsrc, std::shared_ptr<CDSVReader> routesrc){
+    DImplementation = std::make_unique<SImplementation>(stopsrc, routesrc); 
+    std:: vector<std::string> stopRow; 
 }
 
 
