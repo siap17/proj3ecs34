@@ -66,9 +66,10 @@ std::string Center(const std::string &str, int width, char fill) noexcept{
         return str;
     }
     int padding = (width - str.size()) / 2;
+    int right_padding = width - str.size() - padding; 
     std::string res(padding, fill);
     res += str;
-    res.append(width - res.size(), fill);
+    res.append(right_padding, fill);
     return res;
 }
 
@@ -146,14 +147,17 @@ std::string Join(const std::string &str, const std::vector< std::string > &vect)
     
 }
 
+// For ExpandTabs function:
 std::string ExpandTabs(const std::string &str, int tabsize) noexcept {
     std::string res;
-    int col = 0;  // Current column position
+    int col = 0;
 
-    if (tabsize == 0) {
+    if (tabsize <= 0) {
+        // If tabsize is 0 or negative, just remove tabs
         for (char c : str) {
-            if (c != '\t') {  // remove tabs completely
+            if (c != '\t') {
                 res += c;
+                col++;
             }
         }
         return res;
@@ -161,9 +165,9 @@ std::string ExpandTabs(const std::string &str, int tabsize) noexcept {
 
     for (char c : str) {
         if (c == '\t') {
-            int spaces = tabsize - (col % tabsize);  // calc. spaces needed to align
-            col += spaces;
+            int spaces = tabsize - (col % tabsize);
             res.append(spaces, ' ');
+            col += spaces;
         } else {
             res += c;
             col++;
